@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 #include "QFileDialog"
 #include "QMessageBox"
+#include "lexitemdialog.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -58,34 +59,23 @@ void MainWindow::on_parseFileAction_clicked() {
         layout->setContentsMargins(5, 5, 5, 5);
         actions->setLayout(layout);
 
-        QPushButton* nfaAction = new QPushButton("NFA");
+        QPushButton* nfaAction = new QPushButton("NFA->DFA->MDFA");
         nfaAction->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         connect(nfaAction, &QPushButton::clicked, this, [this, i]() {
-            this->handleTableItemAction(i, TableActionType::NFA);
-        });
-        
-        QPushButton* dfaAction = new QPushButton("DFA");
-        dfaAction->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        connect(dfaAction, &QPushButton::clicked, this, [this, i]() {
-            this->handleTableItemAction(i, TableActionType::DFA);
-        });
-
-        QPushButton* mdfaAction = new QPushButton("MDFA");
-        mdfaAction->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        connect(mdfaAction, &QPushButton::clicked, this, [this, i]() {
-            this->handleTableItemAction(i, TableActionType::MDFA);
+            this->handleTableItemAction(i);
         });
 
         layout->addWidget(nfaAction);
-        layout->addWidget(dfaAction);
-        layout->addWidget(mdfaAction);
 
         table->setItem(i, 0, exp);
         table->setCellWidget(i, 1, actions);
     }
+    this->regexList = list;
 }
 
-void MainWindow::handleTableItemAction(int index, TableActionType type) {
-
-    qDebug("handleNfaAction: %d, %d", index, type);
+void MainWindow::handleTableItemAction(int index) {
+    QString regex = this->regexList[index];
+    qDebug("regex: %s", regex.toStdString().c_str());
+    LexItemDialog* dialog = new LexItemDialog(this, regex);
+    dialog->show();
 }

@@ -20,6 +20,9 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        lexitemdialog.h
+        lexitemdialog.cpp
+        lexitemdialog.ui
         include/dfa.hpp
         include/globals.h
         include/mdfa.hpp
@@ -31,6 +34,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(XLEX
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        lexitemdialog.h lexitemdialog.cpp lexitemdialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET XLEX APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

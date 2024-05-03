@@ -21,11 +21,15 @@ private slots:
 
     void on_parseFileAction_clicked();
 
-    void handleTableItemAction(int, TableActionType);
+    void handleTableItemAction(int);
 
 
 private:
     Ui::MainWindow *ui;
+
+    // 当前的正则表达式列表
+    QStringList regexList;
+    
     // 初始化UI
     void init();
 };
