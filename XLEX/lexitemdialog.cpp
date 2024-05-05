@@ -1,7 +1,6 @@
 #include "lexitemdialog.h"
-#include "ui_lexitemdialog.h"
-#include "dfa.hpp"
-#include "nfa.hpp"
+#include "./ui_lexitemdialog.h"
+#include <queue>
 #include "mdfa.hpp"
 
 LexItemDialog::LexItemDialog(QWidget* parent, QString lex) :
@@ -18,11 +17,15 @@ LexItemDialog::~LexItemDialog() {
 }
 
 void LexItemDialog::init() {
-    std::string lex = this->lex.toStdString();
-    Nfa nfa(lex);
+    Nfa nfa(lex.toStdString());
     Dfa dfa(nfa);
     MDfa mdfa(dfa);
+    this->generateNfaTable(nfa);
+    this->generateDfaTable(dfa);
+    this->generateMDfaTable();
+}
 
+void LexItemDialog::generateNfaTable(Nfa& nfa) {
     NfaGraph nfaGraph = nfa.getGraph();
 
     std::set<char> symbols = nfa.getSymbols();
@@ -72,8 +75,40 @@ void LexItemDialog::init() {
         for (char symbol : symbols) {
             if (transfers[i].count(symbol)) {
                 nfaTable->setItem(i, col, new QTableWidgetItem(QString(transfers[i][symbol].c_str())));
-                col += 1;
             }
+            col += 1;
         }
     }
+}
+
+void LexItemDialog::generateDfaTable(Dfa& dfa) {
+    std::vector<DfaNode*> nodes = dfa.getNodes();
+    std::set<char> symbols = dfa.getNfa().getSymbols();
+    QTableWidget* dfaTable = ui->dfaTable;
+    dfaTable->setColumnCount(symbols.size() + 1);
+    dfaTable->setRowCount(nodes.size());
+
+    QStringList header;
+    header << "状态";
+    for (char symbol : symbols) {
+        header << QString(1, symbol);
+    }
+    dfaTable->setHorizontalHeaderLabels(header);
+    dfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    for (int i = 0; i < nodes.size(); ++i) {
+        DfaNode* cur = nodes[i];
+        dfaTable->setItem(i, 0, new QTableWidgetItem(QString::number(i)));
+        int col = 1;
+        for (char symbol : symbols) {
+            if (cur->transfers.count(symbol)) {
+                dfaTable->setItem(i, col, new QTableWidgetItem(QString::number(cur->transfers[symbol])));
+            }
+            col++;
+        }
+    }
+}
+
+void LexItemDialog::generateMDfaTable() {
+
 }

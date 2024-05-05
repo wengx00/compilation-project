@@ -6,6 +6,11 @@
     "*.wxs": "javascript",
     "string": "cpp",
     "algorithm": "cpp",
-    "map": "cpp"
+    "map": "cpp",
+    "iostream": "cpp",
+    "sstream": "cpp",
+    "cstring": "cpp",
+    "queue": "cpp",
+    "vector": "cpp"
   }
 }

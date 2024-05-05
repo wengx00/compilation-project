@@ -1,7 +1,7 @@
-#pragma once
+#ifndef _DFA_HPP
+#define _DFA_HPP
 
 #include <iostream>
-#include "globals.h"
 #include "nfa.hpp"
 #include <cstring>
 #include <string>
@@ -43,6 +43,7 @@ struct DfaNode {
 };
 
 class Dfa {
+
 private:
     void generate() { // 生成DFA图
         NfaGraph nfaGraph = nfa.getGraph();
@@ -119,3 +120,5 @@ public:
         return nodes;
     }
 };
+
+#endif

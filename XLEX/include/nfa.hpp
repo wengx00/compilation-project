@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _NFA_HPP
+#define _NFA_HPP
 
 #include <iostream>
 #include "globals.h"
@@ -130,7 +131,7 @@ private:
         stack<NfaGraph> subgraphs; // 子图栈
         for (int i = 0; i < input.size(); ++i) { // 预处理输入字符串（加入CONCAT字符）
             char id = input[i];
-            if (skip(id)) continue; // 跳过无意义字符
+            if (_skip(id)) continue; // 跳过无意义字符
             prepared.push_back(id);
             if (i + 1 >= input.size() ||
                 input[i + 1] == RBRACKET ||
@@ -156,10 +157,10 @@ private:
                 }
                 continue;
             }
-            if (reservedSymbol(id)) { // 保留字符（运算符）
+            if (_reservedSymbol(id)) { // 保留字符（运算符）
                 while (ops.size()) { // 清空符号栈里优先级比当前高的运算
                     char op = ops.top();
-                    if (privilege(id) > privilege(op)) break; // 优先级没当前OP高
+                    if (_privilege(id) > _privilege(op)) break; // 优先级没当前OP高
                     ops.pop(); // 优先级较高，出栈并执行
                     setAction(op, subgraphs); // 执行操作
                 }
@@ -194,3 +195,5 @@ public:
         return graph;
     }
 };
+
+#endif

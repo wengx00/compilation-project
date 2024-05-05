@@ -2,6 +2,8 @@
 #define LEXITEMDIALOG_H
 
 #include <QDialog>
+#include "nfa.hpp"
+#include "dfa.hpp"
 
 namespace Ui {
 class LexItemDialog;
@@ -21,6 +23,12 @@ private:
     QString lex;
 
     void init();
+    // 生成NFA图
+    void generateNfaTable(Nfa&);
+    // 生成DFA图
+    void generateDfaTable(Dfa&);
+    // 生成MDFA图
+    void generateMDfaTable();
 };
 
 #endif // LEXITEMDIALOG_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _GLOBALS_H
+#define _GLOBALS_H
 
 // EPSILON符号
 #define EPSILON '@'
@@ -23,14 +24,14 @@ const char RESERVED[RESERVED_COUNT] = {
     EPSILON, CONCAT, UNION, CLOSURE, LBRACKET, RBRACKET
 };
 
-int indexOf(const char *source, int count, char target) {
+inline int _indexOf(const char *source, int count, char target) {
     for (int i = 0; i < count; ++i)
         if (source[i] == target) return i;
     return -1;
 }
 
 // 优先级
-int privilege(char target) {
+inline int _privilege(char target) {
     switch (target)
     {
     case CLOSURE:
@@ -45,11 +46,13 @@ int privilege(char target) {
 }
 
 // 是否特殊字符
-bool reservedSymbol(char target) {
-    return indexOf(RESERVED, RESERVED_COUNT, target) > -1;
+inline bool _reservedSymbol(char target) {
+    return _indexOf(RESERVED, RESERVED_COUNT, target) > -1;
 }
 
 // 是否无意义字符
-bool skip(char target) {
-    return indexOf(SKIP, SKIP_COUNT, target) > -1;
+inline bool _skip(char target) {
+    return _indexOf(SKIP, SKIP_COUNT, target) > -1;
 }
+
+#endif

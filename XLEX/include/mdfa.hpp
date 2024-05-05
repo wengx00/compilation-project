@@ -1,7 +1,7 @@
-#pragma once
+#ifndef _MDFA_HPP
+#define _MDFA_HPP
 
 #include <iostream>
-#include "globals.h"
 #include "dfa.hpp"
 #include <cstring>
 #include <string>
@@ -40,6 +40,7 @@ struct MDfaNode {
 };
 
 class MDfa {
+
 private:
     Dfa& dfa;
     vector<MDfaNode*> nodes;
@@ -220,3 +221,5 @@ public:
         return ss.str();
     }
 };
+
+#endif
