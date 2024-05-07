@@ -145,7 +145,7 @@ void LexItemDialog::generateMDfaTable(MDfa& mdfa) {
 }
 
 void LexItemDialog::on_codeGenerate_clicked() {
-    QString filename = QFileDialog::getSaveFileName(this, "保存文件", "~/", "C++源文件(*.cpp,*.cc)");
+    QString filename = QFileDialog::getSaveFileName(this, "保存文件", ".", "C++源文件(*.cpp)");
     QFile file{ filename };
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out{ &file };
