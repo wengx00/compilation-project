@@ -16,7 +16,6 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::init() {
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 }
 
@@ -47,35 +46,18 @@ void MainWindow::on_parseFileAction_clicked() {
     QString* str = new QString(ui->lexEditor->toPlainText());
     // 根据换行分割
     QStringList list = str->split('\n');
-    // 分别生成 Table Column
-    QTableWidget* table = ui->tableWidget;
-    table->setRowCount(list.size());
-    // 列: 序号、正则表达式、
-    for (int i = 0; i < list.length(); ++i) {
-        QTableWidgetItem* exp = new QTableWidgetItem(list[i]);
-
-        QWidget* actions = new QWidget();
-        QLayout* layout = new QHBoxLayout();
-        layout->setContentsMargins(5, 5, 5, 5);
-        actions->setLayout(layout);
-
-        QPushButton* nfaAction = new QPushButton("NFA->DFA->MDFA");
-        nfaAction->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        connect(nfaAction, &QPushButton::clicked, this, [this, i]() {
-            this->handleTableItemAction(i);
-        });
-
-        layout->addWidget(nfaAction);
-
-        table->setItem(i, 0, exp);
-        table->setCellWidget(i, 1, actions);
+    // 行与行之间形成或关系
+    QStringList parsedExp;
+    for (int i = 0; i < list.size(); ++i) {
+        parsedExp << "(" << list[i] << ")";
+        if (i < list.size() - 1) {
+            parsedExp << "|";
+        }
     }
-    this->regexList = list;
-}
 
-void MainWindow::handleTableItemAction(int index) {
-    QString regex = this->regexList[index];
+    regex = parsedExp.join("");
     qDebug("regex: %s", regex.toStdString().c_str());
     LexItemDialog* dialog = new LexItemDialog(this, regex);
     dialog->show();
 }
+

@@ -220,6 +220,10 @@ public:
         ss << "}" << '\n';
         return ss.str();
     }
+
+    Dfa& getDfa() {
+        return dfa;
+    }
 };
 
 #endif

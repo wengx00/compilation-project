@@ -1,7 +1,7 @@
 #include "lexitemdialog.h"
 #include "./ui_lexitemdialog.h"
-#include <queue>
-#include "mdfa.hpp"
+#include <QFileDialog>
+#include <QMessageBox>
 
 LexItemDialog::LexItemDialog(QWidget* parent, QString lex) :
     QDialog(parent),
@@ -14,15 +14,17 @@ LexItemDialog::LexItemDialog(QWidget* parent, QString lex) :
 
 LexItemDialog::~LexItemDialog() {
     delete ui;
+    delete mdfa;
 }
 
 void LexItemDialog::init() {
     Nfa nfa(lex.toStdString());
     Dfa dfa(nfa);
-    MDfa mdfa(dfa);
+    this->mdfa = new MDfa(dfa);
+
     this->generateNfaTable(nfa);
     this->generateDfaTable(dfa);
-    this->generateMDfaTable();
+    this->generateMDfaTable(*mdfa);
 }
 
 void LexItemDialog::generateNfaTable(Nfa& nfa) {
@@ -54,8 +56,8 @@ void LexItemDialog::generateNfaTable(Nfa& nfa) {
             transfers[cur->state][p.first] = target;
         }
     }
-    
-    QTableWidget *nfaTable = ui->nfaTable;
+
+    QTableWidget* nfaTable = ui->nfaTable;
 
     nfaTable->setColumnCount(symbols.size() + 1);
     nfaTable->setRowCount(transfers.size());
@@ -63,6 +65,10 @@ void LexItemDialog::generateNfaTable(Nfa& nfa) {
     QStringList header;
     header << "状态";
     for (char symbol : symbols) {
+        if (symbol == EPSILON) {
+            header << "EPSILON";
+            continue;
+        }
         header << QString(1, symbol);
     }
     nfaTable->setHorizontalHeaderLabels(header);
@@ -109,6 +115,46 @@ void LexItemDialog::generateDfaTable(Dfa& dfa) {
     }
 }
 
-void LexItemDialog::generateMDfaTable() {
+void LexItemDialog::generateMDfaTable(MDfa& mdfa) {
+    std::set<char> symbols = mdfa.getDfa().getNfa().getSymbols();
+    std::vector<MDfaNode*> nodes = mdfa.getNodes();
 
+    QTableWidget* mdfaTable = ui->mdfaTable;
+    mdfaTable->setColumnCount(symbols.size() + 1);
+    mdfaTable->setRowCount(nodes.size());
+
+    QStringList header;
+    header << "状态";
+    for (char symbol : symbols) {
+        header << QString(1, symbol);
+    }
+    mdfaTable->setHorizontalHeaderLabels(header);
+    mdfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    for (int i = 0; i < nodes.size(); ++i) {
+        MDfaNode* cur = nodes[i];
+        mdfaTable->setItem(i, 0, new QTableWidgetItem(QString::number(i)));
+        int col = 1;
+        for (char symbol : symbols) {
+            if (cur->transfer.count(symbol)) {
+                mdfaTable->setItem(i, col, new QTableWidgetItem(QString::number(cur->transfer[symbol])));
+            }
+            col++;
+        }
+    }
 }
+
+void LexItemDialog::on_codeGenerate_clicked() {
+    QString filename = QFileDialog::getSaveFileName(this, "保存文件", "~/", "C++源文件(*.cpp,*.cc)");
+    QFile file{ filename };
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out{ &file };
+        out << QString::fromStdString(mdfa->lex());
+        file.close();
+        QMessageBox::information(this, "提示", "生成成功");
+        return;
+    }
+
+    QMessageBox::information(this, "提示", "文件保存失败");
+}
+

@@ -7,12 +7,11 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -20,15 +19,12 @@ private slots:
 
     void on_parseFileAction_clicked();
 
-    void handleTableItemAction(int);
-
-
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
 
-    // 当前的正则表达式列表
-    QStringList regexList;
-    
+    // 当前的正则表达式
+    QString regex;
+
     // 初始化UI
     void init();
 };

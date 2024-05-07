@@ -11,6 +11,7 @@
     "sstream": "cpp",
     "cstring": "cpp",
     "queue": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "set": "cpp"
   }
 }
