@@ -1,36 +1,108 @@
+/*
+ * @Author: 翁行
+ * @Date: 2024-05-07 13:14:38
+ * Copyright 2024 (c) 翁行, All Rights Reserved.
+ */
 #include "lexitemdialog.h"
 #include "./ui_lexitemdialog.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <sstream>
 
-LexItemDialog::LexItemDialog(QWidget* parent, QString lex) :
+LexItemDialog::LexItemDialog(YAML::Node& doc, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::LexItemDialog),
-    lex(lex) {
+    ui(new Ui::LexItemDialog) {
     ui->setupUi(this);
-    this->setWindowTitle(lex);
-    init();
+    this->setWindowTitle("状态转换图");
+    init(doc);
 }
 
 LexItemDialog::~LexItemDialog() {
     delete ui;
-    delete mdfa;
+    if (nfa) delete nfa;
+    if (dfa) delete dfa;
+    if (mdfa) delete mdfa;
 }
 
-void LexItemDialog::init() {
-    Nfa nfa(lex.toStdString());
-    Dfa dfa(nfa);
-    this->mdfa = new MDfa(dfa);
+void LexItemDialog::init(YAML::Node& doc) {
+    std::stringstream ss;
+    // 所有保留字
+    for (auto it = doc["RESERVED"].begin(); it != doc["RESERVED"].end(); ++it) {
+        reserved[it->first.as<std::string>()] = it->second.as<std::string>();
+    }
+    // 所有OP
+    for (auto it = doc["OP"].begin(); it != doc["OP"].end(); ++it) {
+        op[it->first.as<std::string>()] = it->second.as<std::string>();
+    }
+    ss.clear();
+    ss.str("");
+    for (int i = 0; i < doc["DIGIT"].size(); ++i) {
+        ss << doc["DIGIT"][i].as<std::string>();
+        if (i != doc["DIGIT"].size() - 1) ss << "|";
+    }
+    ss >> digit;
+    ss.clear();
+    ss.str("");
+    for (int i = 0; i < doc["LETTER"].size(); ++i) {
+        ss << doc["LETTER"][i].as<std::string>();
+        if (i != doc["LETTER"].size() - 1) ss << "|";
+    }
+    ss >> letter;
+    ss.clear();
+    ss.str("");
 
-    this->generateNfaTable(nfa);
-    this->generateDfaTable(dfa);
-    this->generateMDfaTable(*mdfa);
+    qDebug("[LETTER] %s", letter.c_str());
+    qDebug("[DIGIT] %s", digit.c_str());
+
+    identifier = doc["IDENTIFIER"].as<std::string>();
+    number = doc["NUMBER"].as<std::string>();
+    comment = doc["COMMENT"].as<std::string>();
+
+
+    // 替换 identifier 里的 digit、number 和 letter
+    _replaceAll(number, "DIGIT", "(" + digit + ")");
+    _replaceAll(identifier, "NUMBER", number);
+    _replaceAll(identifier, "LETTER", "(" + letter + ")");
+    _replaceAll(identifier, "DIGIT", "(" + digit + ")");
+
+    qDebug("[IDENTIFIER] %s", identifier.c_str());
+    qDebug("[NUMBER] %s", number.c_str());
+    qDebug("[COMMENT] %s", comment.c_str());
+
+    // 拼接总的正则表达式
+    QVector<std::string> tokens;
+    if (identifier.size() > 0) {
+        tokens.push_back(identifier);
+    }
+    if (number.size() > 0) {
+        tokens.push_back(number);
+    }
+    if (comment.size() > 0) {
+        tokens.push_back(comment);
+    }
+    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+        ss << *it;
+        if (it != tokens.end() - 1) ss << "|";
+    }
+    ss >> regex;
+    ss.str("");
+
+    qDebug("[REGEX] %s", regex.c_str());
+
+    nfa = new Nfa(regex);
+    dfa = new Dfa(*nfa);
+    mdfa = new MDfa(*dfa);
+
+    // NFA -> DFA -> MDFA
+    this->generateNfaTable();
+    this->generateDfaTable();
+    this->generateMDfaTable();
 }
 
-void LexItemDialog::generateNfaTable(Nfa& nfa) {
-    NfaGraph nfaGraph = nfa.getGraph();
+void LexItemDialog::generateNfaTable() {
+    NfaGraph nfaGraph = nfa->getGraph();
 
-    std::set<char> symbols = nfa.getSymbols();
+    std::set<char> symbols = nfa->getSymbols();
     symbols.insert(EPSILON);
     std::vector<std::map<char, std::string>> transfers(nfaGraph.end->state + 1);
     std::vector<int> visited(nfaGraph.end->state + 1);
@@ -87,9 +159,9 @@ void LexItemDialog::generateNfaTable(Nfa& nfa) {
     }
 }
 
-void LexItemDialog::generateDfaTable(Dfa& dfa) {
-    std::vector<DfaNode*> nodes = dfa.getNodes();
-    std::set<char> symbols = dfa.getNfa().getSymbols();
+void LexItemDialog::generateDfaTable() {
+    std::vector<DfaNode*> nodes = dfa->getNodes();
+    std::set<char> symbols = nfa->getSymbols();
     QTableWidget* dfaTable = ui->dfaTable;
     dfaTable->setColumnCount(symbols.size() + 1);
     dfaTable->setRowCount(nodes.size());
@@ -115,9 +187,9 @@ void LexItemDialog::generateDfaTable(Dfa& dfa) {
     }
 }
 
-void LexItemDialog::generateMDfaTable(MDfa& mdfa) {
-    std::set<char> symbols = mdfa.getDfa().getNfa().getSymbols();
-    std::vector<MDfaNode*> nodes = mdfa.getNodes();
+void LexItemDialog::generateMDfaTable() {
+    std::set<char> symbols = nfa->getSymbols();
+    std::vector<MDfaNode*> nodes = mdfa->getNodes();
 
     QTableWidget* mdfaTable = ui->mdfaTable;
     mdfaTable->setColumnCount(symbols.size() + 1);

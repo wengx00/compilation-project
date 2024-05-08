@@ -1,3 +1,9 @@
+/*
+ * @Author: 翁行
+ * @Date: 2023-12-31 16:20:40
+ * Copyright 2024 (c) 翁行, All Rights Reserved.
+ */
+
 #ifndef _DFA_HPP
 #define _DFA_HPP
 

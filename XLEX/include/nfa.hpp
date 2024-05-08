@@ -1,3 +1,9 @@
+/*
+ * @Author: 翁行
+ * @Date: 2023-12-31 15:06:30
+ * Copyright 2024 (c) 翁行, All Rights Reserved.
+ */
+
 #ifndef _NFA_HPP
 #define _NFA_HPP
 
@@ -103,13 +109,47 @@ private:
         return graph;
     }
 
+    // 问号闭包
+    NfaGraph setClosureStar(NfaGraph& target) {
+        NfaGraph graph(new NfaNode, new NfaNode);
+        target.updateState(1);
+        graph.end->state = target.end->state + 1;
+        target.end->isEnd = false;
+        graph.start->transfers[EPSILON].push_back(target.start);
+        graph.start->transfers[EPSILON].push_back(graph.end);
+        target.end->transfers[EPSILON].push_back(graph.end);
+        return graph;
+    }
+
+    // 正闭包
+    NfaGraph setClosurePlus(NfaGraph& target) {
+        NfaGraph graph(new NfaNode, new NfaNode);
+        target.updateState(1);
+        graph.end->state = target.end->state + 1;
+        target.end->isEnd = false;
+        graph.start->transfers[EPSILON].push_back(target.start);
+        target.end->transfers[EPSILON].push_back(graph.end);
+        target.end->transfers[EPSILON].push_back(target.start);
+        return graph;
+    }
+
     void setAction(char op, stack<NfaGraph>& subgraphs) {
         NfaGraph result;
-        if (op == CLOSURE) {
+        if (op == CLOSURE || op == CLOSURE_PLUS || op == CLOSURE_STAR) {
             // 单目运算
             NfaGraph& target = subgraphs.top();
             subgraphs.pop();
-            result = setClosure(target);
+            switch (op) {
+            case CLOSURE:
+                result = setClosure(target);
+                break;
+            case CLOSURE_PLUS:
+                result = setClosurePlus(target);
+                break;
+            case CLOSURE_STAR:
+                result = setClosureStar(target);
+                break;
+            }
         }
         else {
             // 双目运算符
@@ -138,7 +178,9 @@ private:
                 input[i] == UNION ||
                 input[i + 1] == UNION ||
                 input[i] == LBRACKET ||
-                input[i + 1] == CLOSURE) continue; // 这些情况不用手动加入联结符号
+                input[i + 1] == CLOSURE ||
+                input[i + 1] == CLOSURE_PLUS ||
+                input[i + 1] == CLOSURE_STAR) continue; // 这些情况不用手动加入联结符号
             // 人为加入表示UNION的字符
             prepared.push_back(CONCAT);
         }
