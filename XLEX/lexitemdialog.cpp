@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <sstream>
+#include <fstream>
 
 LexItemDialog::LexItemDialog(YAML::Node& doc, QWidget* parent) :
     QDialog(parent),
@@ -27,11 +28,11 @@ LexItemDialog::~LexItemDialog() {
 void LexItemDialog::init(YAML::Node& doc) {
     // 所有保留字
     for (auto it = doc["RESERVED"].begin(); it != doc["RESERVED"].end(); ++it) {
-        reserved[it->first.as<std::string>()] = it->second.as<std::string>();
+        reserved[it->second.as<std::string>()] = it->first.as<std::string>();
     }
     // 所有OP
     for (auto it = doc["OP"].begin(); it != doc["OP"].end(); ++it) {
-        op[it->first.as<std::string>()] = it->second.as<std::string>();
+        op[it->second.as<std::string>()] = it->first.as<std::string>();
     }
     digit = "";
     for (int i = 0; i < doc["DIGIT"].size(); ++i) {
@@ -64,6 +65,12 @@ void LexItemDialog::init(YAML::Node& doc) {
 
     // 拼接总的正则表达式
     std::vector<std::string> tokens;
+    for (auto it = reserved.begin(); it != reserved.end(); ++it) {
+        tokens.push_back(it->first);
+    }
+    for (auto it = op.begin(); it != op.end(); ++it) {
+        tokens.push_back(it->first);
+    }
     if (identifier.size() > 0) {
         tokens.push_back(identifier);
     }
@@ -122,7 +129,6 @@ void LexItemDialog::generateNfaTable() {
     }
 
     QTableWidget* nfaTable = ui->nfaTable;
-
     nfaTable->setColumnCount(symbols.size() + 1);
     nfaTable->setRowCount(transfers.size());
     // 设置nfaTable Header
@@ -136,7 +142,8 @@ void LexItemDialog::generateNfaTable() {
         header << QString(1, symbol);
     }
     nfaTable->setHorizontalHeaderLabels(header);
-    nfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    nfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+
 
     // 设置nfaTable Content
     for (int i = 0; i < transfers.size(); ++i) {
@@ -164,7 +171,7 @@ void LexItemDialog::generateDfaTable() {
         header << QString(1, symbol);
     }
     dfaTable->setHorizontalHeaderLabels(header);
-    dfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    dfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
     for (int i = 0; i < nodes.size(); ++i) {
         DfaNode* cur = nodes[i];
@@ -193,7 +200,7 @@ void LexItemDialog::generateMDfaTable() {
         header << QString(1, symbol);
     }
     mdfaTable->setHorizontalHeaderLabels(header);
-    mdfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    mdfaTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
     for (int i = 0; i < nodes.size(); ++i) {
         MDfaNode* cur = nodes[i];
@@ -208,12 +215,188 @@ void LexItemDialog::generateMDfaTable() {
     }
 }
 
+QString LexItemDialog::codeGenerate() {
+    std::vector<MDfaNode*> nodes = mdfa->getNodes();
+    QString code;
+    // 库文件
+    code +=
+        "#include <iostream>\n"
+        "#include <string>\n"
+        "#include <cstring>\n"
+        "#include <vector>\n"
+        "#include <map>\n"
+        "#include <sstream>\n"
+        "#include <fstream>\n\n";
+    // namespace
+    code += "using namespace std;\n\n";
+
+    // RESERVED 关键字
+    code += "map<string, string> reserved = {\n";
+    for (auto& it : reserved) {
+        code += "\t{\"" + it.first + "\", \"" + it.second + "\"},\n";
+    }
+    code += "};\n";
+
+    // OP 运算符
+    code += "map<string, string> op = {\n";
+    for (auto& it : op) {
+        code += "\t{\"" + it.first + "\", \"" + it.second + "\"},\n";
+    }
+    code += "};\n";
+
+    // 工具方法：是否数字Token
+    code +=
+        "bool isNumber(string token) {\n"
+        "\tif (token.size() < 1) return false;\n"
+        "\tif (token[0] > '0' && token[0] < '9') return true;\n"
+        "\treturn false;\n"
+        "}\n";
+
+    // 处理Token的方法
+    code +=
+        "void handleToken(string token, ofstream& os) {\n"
+        "\tif (token.size() == 0) return;\n"
+        "\tstring label;\n"
+        "\tif (reserved.count(token)) label = reserved[token];\n"
+        "\telse if (op.count(token)) label = op[token];\n"
+        "\telse if (isNumber(token)) label = \"Number\";\n"
+        "\telse label = \"Identifier\";\n"
+        "\tcout << label << ':' << token << '\\n';\n"
+        "\tos << label << ':' << token << '\\n';\n"
+        "}\n";
+
+    // 主函数头
+    code += "int main(int argc, char* argv[]) {\n";
+    // 入参校验
+    code +=
+        "\tif (argc != 3) {\n"
+        "\t\t cout << \"Error: Invalid input. Require input file path on agrv[1] and output file path on agrv[2]. \" << '\\n';\n"
+        "\t\t return 1;\n"
+        "\t}\n";
+    // 源代码文件path
+    code += "\tstring path = argv[1];\n";
+    // 输出文件path
+    code += "\tstring outputPath = argv[2];\n";
+    // 打开文件
+    code +=
+        "\tifstream ifs(path);\n"
+        "\tofstream os(outputPath);\n"
+        "\tif (!ifs || !ifs.is_open()) {\n"
+        "\t\tcout << \"Error: Cannot open input file. \" << '\\n';\n"
+        "\t\treturn 1;\n"
+        "\t}\n"
+        "\tif (!os || !os.is_open()) {\n"
+        "\t\tcout << \"Error: Cannot open output file. \" << '\\n';\n"
+        "\t\treturn 1;\n"
+        "\t}\n";
+    // 读取源代码
+    code +=
+        "\tstringstream ss;\n"
+        "\tss << ifs.rdbuf();\n"
+        "\tstring code = ss.str();\n"
+        "\tstring token = \"\";\n"
+        "\tss.clear();\n"
+        "\tss.str(\"\");\n";
+    // 初始状态
+    code += "\tint currentState = 0;\n";
+    // 循环遍历
+    code +=
+        "\tfor (int i = 0; i < code.size(); ++i) {\n"
+        "\t\tchar id = code[i];\n"
+        "\t\tswitch(currentState) {\n";
+    for (MDfaNode* node : nodes) {
+        code +=
+            "\t\t\tcase " + QString::number(node->state) + ":\n"
+            "\t\t\t\tswitch (id) {\n";
+        for (auto& p : node->transfer) {
+            if (p.first == ANY) continue;
+            code +=
+                "\t\t\t\t\tcase '" + QString(p.first) + "':\n"
+                "\t\t\t\t\t\tcurrentState = " + QString::number(p.second) + ";\n"
+                "\t\t\t\t\t\ttoken += id;\n"
+                "\t\t\t\t\t\tbreak;\n";
+        }
+        if (node->transfer.count(ANY)) {
+            code +=
+                "\t\t\t\t\tdefault:\n"
+                "\t\t\t\t\tif (id == '\\n') {\n"
+                "\t\t\t\t\t\tif (token.size() > 0) {\n"
+                "\t\t\t\t\t\t\thandleToken(token, os);\n"
+                "\t\t\t\t\t\t\ttoken = \"\";\n"
+                "\t\t\t\t\t\t}\n"
+                "\t\t\t\t\t\tcurrentState = 0;\n"
+                "\t\t\t\t\t}\n"
+                "\t\t\t\t\telse {\n"
+                "\t\t\t\t\tcurrentState = " + QString::number(node->transfer[ANY]) + ";\n"
+                "\t\t\t\t\ttoken += id;\n"
+                "\t\t\t\t\t}\n"
+                "\t\t\t\t\tbreak;\n";
+        }
+        else {
+            if (node->isEnd) {
+                // 拿到一个分词，重新开始
+                code +=
+                    "\t\t\t\t\tdefault:\n"
+                    "\t\t\t\t\t\tif (token.size() > 0) {\n"
+                    "\t\t\t\t\t\t\thandleToken(token, os);\n"
+                    "\t\t\t\t\t\t\ttoken = \"\";\n"
+                    "\t\t\t\t\t\t\tif (id != '\\n' && id != ' ' && id != '\\t') {\n"
+                    "\t\t\t\t\t\t\t\ti--;\n"
+                    "\t\t\t\t\t\t\t}\n"
+                    "\t\t\t\t\t\t}\n"
+                    "\t\t\t\t\t\tcurrentState = 0;\n";
+            }
+            else {
+                // 其他情况为错误情形
+                code +=
+                    "\t\t\t\t\tdefault:\n"
+                    "\t\t\t\t\t\tos << \"Error: Invalid input character. \" << '\\n';\n"
+                    "\t\t\t\t\t\tcout << \"Error: Invalid input character. \" << '\\n';\n"
+                    "\t\t\t\t\t\treturn 1;\n";
+            }
+        }
+        code +=
+            "\t\t\t\t}\n"
+            "\t\t\tbreak;\n";
+    }
+    code +=
+        "\t\t}\n"
+        "\t}\n";
+
+    // 读取完毕，根据最终状态取到最后的分词
+    code += "\tswitch(currentState) {\n";
+    for (auto node : nodes) {
+        if (node->isEnd) {
+            code +=
+                "\t\tcase " + QString::number(node->state) + ":\n";
+        }
+    }
+    code +=
+        "\t\t\tif (token.size() > 0) {\n"
+        "\t\t\t\thandleToken(token, os);\n"
+        "\t\t\t}\n"
+        "\t\t\tbreak;\n";
+    // 其他情况为错误情形
+    code +=
+        "\t\tdefault:\n"
+        "\t\t\tcout << \"Error: Invalid input. \" << '\\n';\n"
+        "\t\t\treturn 1;"
+        "\t}\n";
+    // 主函数尾
+    code +=
+        "\tcout << \"Success.\" << '\\n';\n"
+        "\treturn 0;"
+        "}\n";
+    qDebug() << "[Generate Code]" << '\n' << code;
+    return code;
+}
+
 void LexItemDialog::on_codeGenerate_clicked() {
     QString filename = QFileDialog::getSaveFileName(this, "保存文件", ".", "C++源文件(*.cpp)");
     QFile file{ filename };
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out{ &file };
-        out << QString::fromStdString(mdfa->lex());
+        out << codeGenerate();
         file.close();
         QMessageBox::information(this, "提示", "生成成功");
         return;

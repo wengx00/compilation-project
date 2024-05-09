@@ -49,6 +49,9 @@ private:
     void generateDfaTable();
     // 生成MDFA图
     void generateMDfaTable();
+
+    // 代码生成
+    QString codeGenerate();
 };
 
 #endif // LEXITEMDIALOG_H
