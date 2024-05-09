@@ -23,8 +23,8 @@
 #define LBRACKET '('
 // 右括号
 #define RBRACKET ')'
-// TODO: 任意字符
 // TODO: . + * ? | 字符转译
+// 任意字符
 #define ANY '~'
 
 // 无意义字符，需跳过

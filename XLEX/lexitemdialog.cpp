@@ -25,7 +25,6 @@ LexItemDialog::~LexItemDialog() {
 }
 
 void LexItemDialog::init(YAML::Node& doc) {
-    std::stringstream ss;
     // 所有保留字
     for (auto it = doc["RESERVED"].begin(); it != doc["RESERVED"].end(); ++it) {
         reserved[it->first.as<std::string>()] = it->second.as<std::string>();
@@ -34,22 +33,16 @@ void LexItemDialog::init(YAML::Node& doc) {
     for (auto it = doc["OP"].begin(); it != doc["OP"].end(); ++it) {
         op[it->first.as<std::string>()] = it->second.as<std::string>();
     }
-    ss.clear();
-    ss.str("");
+    digit = "";
     for (int i = 0; i < doc["DIGIT"].size(); ++i) {
-        ss << doc["DIGIT"][i].as<std::string>();
-        if (i != doc["DIGIT"].size() - 1) ss << "|";
+        digit += doc["DIGIT"][i].as<std::string>();
+        if (i != doc["DIGIT"].size() - 1) digit += "|";
     }
-    ss >> digit;
-    ss.clear();
-    ss.str("");
+    letter = "";
     for (int i = 0; i < doc["LETTER"].size(); ++i) {
-        ss << doc["LETTER"][i].as<std::string>();
-        if (i != doc["LETTER"].size() - 1) ss << "|";
+        letter += doc["LETTER"][i].as<std::string>();
+        if (i != doc["LETTER"].size() - 1) letter += "|";
     }
-    ss >> letter;
-    ss.clear();
-    ss.str("");
 
     qDebug("[LETTER] %s", letter.c_str());
     qDebug("[DIGIT] %s", digit.c_str());
@@ -70,7 +63,7 @@ void LexItemDialog::init(YAML::Node& doc) {
     qDebug("[COMMENT] %s", comment.c_str());
 
     // 拼接总的正则表达式
-    QVector<std::string> tokens;
+    std::vector<std::string> tokens;
     if (identifier.size() > 0) {
         tokens.push_back(identifier);
     }
@@ -80,12 +73,11 @@ void LexItemDialog::init(YAML::Node& doc) {
     if (comment.size() > 0) {
         tokens.push_back(comment);
     }
-    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-        ss << *it;
-        if (it != tokens.end() - 1) ss << "|";
+    regex = "";
+    for (int it = 0; it < tokens.size(); ++it) {
+        regex += tokens[it];
+        if (it != tokens.size() - 1) regex += "|";
     }
-    ss >> regex;
-    ss.str("");
 
     qDebug("[REGEX] %s", regex.c_str());
 

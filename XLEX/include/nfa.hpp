@@ -174,10 +174,11 @@ private:
             if (_skip(id)) continue; // 跳过无意义字符
             prepared.push_back(id);
             if (i + 1 >= input.size() ||
-                input[i + 1] == RBRACKET ||
                 input[i] == UNION ||
-                input[i + 1] == UNION ||
+                input[i] == CONCAT ||
                 input[i] == LBRACKET ||
+                input[i + 1] == RBRACKET ||
+                input[i + 1] == UNION ||
                 input[i + 1] == CLOSURE ||
                 input[i + 1] == CLOSURE_PLUS ||
                 input[i + 1] == CLOSURE_STAR) continue; // 这些情况不用手动加入联结符号

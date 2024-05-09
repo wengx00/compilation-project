@@ -205,8 +205,14 @@ public:
                 ss << "                 break;" << '\n';
             }
             ss << "             default:" << '\n';
-            ss << "                 cout << \"Error: Invalid input character.\" << '\\n';" << '\n';
-            ss << "                 return 1;" << '\n';
+            if (node->transfer.count(ANY)) {
+                ss << "                 currentState = " << node->transfer[ANY] << ";" << '\n';
+                ss << "                 break;" << '\n';
+            }
+            else {
+                ss << "                 cout << \"Error: Invalid input character.\" << '\\n';" << '\n';
+                ss << "                 return 1;" << '\n';
+            }
             ss << "             }" << '\n';
             ss << "             break;" << '\n';
         }
