@@ -4,6 +4,7 @@
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
 #include "lexitemdialog.h"
+#include "codepreviewer.h"
 #include "./ui_lexitemdialog.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -252,6 +253,14 @@ QString LexItemDialog::codeGenerate() {
         "\treturn false;\n"
         "}\n";
 
+    // 工具方法：是否注释Token
+    code +=
+        "bool isComment(string token) {\n"
+        "\tif (token.size() < 2) return false;\n"
+        "\tif (token[0] == '/' && token[1] == '/') return true;\n"
+        "\treturn false;\n"
+        "}\n";
+
     // 处理Token的方法
     code +=
         "void handleToken(string token, ofstream& os) {\n"
@@ -260,9 +269,10 @@ QString LexItemDialog::codeGenerate() {
         "\tif (reserved.count(token)) label = reserved[token];\n"
         "\telse if (op.count(token)) label = op[token];\n"
         "\telse if (isNumber(token)) label = \"Number\";\n"
+        "\telse if (isComment(token)) label = \"Comment\";\n"
         "\telse label = \"Identifier\";\n"
-        "\tcout << label << ':' << token << '\\n';\n"
-        "\tos << label << ':' << token << '\\n';\n"
+        "\tcout << label << \" : \" << token << '\\n';\n"
+        "\tos << label << \" : \" << token << '\\n';\n"
         "}\n";
 
     // 主函数头
@@ -385,23 +395,14 @@ QString LexItemDialog::codeGenerate() {
     // 主函数尾
     code +=
         "\tcout << \"Success.\" << '\\n';\n"
-        "\treturn 0;"
+        "\treturn 0;\n"
         "}\n";
-    qDebug() << "[Generate Code]" << '\n' << code;
     return code;
 }
 
 void LexItemDialog::on_codeGenerate_clicked() {
-    QString filename = QFileDialog::getSaveFileName(this, "保存文件", ".", "C++源文件(*.cpp)");
-    QFile file{ filename };
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out{ &file };
-        out << codeGenerate();
-        file.close();
-        QMessageBox::information(this, "提示", "生成成功");
-        return;
-    }
-
-    QMessageBox::information(this, "提示", "文件保存失败");
+    QString code = codeGenerate();
+    CodePreviewer* codePreviewer = new CodePreviewer(code, this);
+    codePreviewer->show();
 }
 

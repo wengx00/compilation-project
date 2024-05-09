@@ -24,6 +24,9 @@ set(PROJECT_SOURCES
         lexitemdialog.h 
         lexitemdialog.cpp 
         lexitemdialog.ui
+        codepreviewer.h 
+        codepreviewer.cpp 
+        codepreviewer.ui
 )
 
 

@@ -58,7 +58,8 @@
     "typeinfo": "cpp",
     "unordered_map": "cpp",
     "valarray": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "qfiledialog": "cpp"
   },
   "fileheader.customMade": {
     "Author": "翁行",
