@@ -97,6 +97,18 @@ void LexItemDialog::init(YAML::Node& doc) {
     this->generateNfaTable();
     this->generateDfaTable();
     this->generateMDfaTable();
+
+    // map里的key要把转译字符删掉
+    std::map<std::string, std::string> reserved;
+    std::map<std::string, std::string> op;
+    for (auto& it : this->reserved) {
+        reserved[_removeEscape(it.first)] = it.second;
+    }
+    for (auto& it : this->op) {
+        op[_removeEscape(it.first)] = it.second;
+    }
+    this->reserved = reserved;
+    this->op = op;
 }
 
 void LexItemDialog::generateNfaTable() {

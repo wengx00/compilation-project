@@ -166,32 +166,47 @@ private:
 
     // 生成顶层NFA图
     void generate(string input) {
+        bool translate = false; // 转译字符作用
         string prepared = ""; // 预处理后的输入字符串
         stack<char> ops; // 符号栈
         stack<NfaGraph> subgraphs; // 子图栈
         for (int i = 0; i < input.size(); ++i) { // 预处理输入字符串（加入CONCAT字符）
             char id = input[i];
+            if (id == '\\' && !translate) {
+                translate = true; // 开启转译
+                prepared.push_back('\\');
+                continue;
+            }
             if (_skip(id)) continue; // 跳过无意义字符
             prepared.push_back(id);
-            if (i + 1 >= input.size() ||
-                input[i] == UNION ||
-                input[i] == CONCAT ||
-                input[i] == LBRACKET ||
+            if (!(i + 1 >= input.size() ||
+                ((
+                    input[i] == UNION ||
+                    input[i] == CONCAT ||
+                    input[i] == LBRACKET
+                    ) &&
+                    !translate
+                    ) ||
                 input[i + 1] == RBRACKET ||
                 input[i + 1] == UNION ||
                 input[i + 1] == CLOSURE ||
                 input[i + 1] == CLOSURE_PLUS ||
-                input[i + 1] == CLOSURE_STAR) continue; // 这些情况不用手动加入联结符号
-            // 人为加入表示UNION的字符
-            prepared.push_back(CONCAT);
+                input[i + 1] == CLOSURE_STAR
+                )) prepared.push_back(CONCAT); // 这些情况用手动加入联结符号
+            translate = false;
         }
+        translate = false;
         for (int i = 0; i < prepared.size(); ++i) {
             char id = prepared[i]; // 当前Identifier
-            if (id == LBRACKET) { // 左括号
+            if (id == '\\' && !translate) {
+                translate = true; // 开启转译
+                continue;
+            }
+            if (id == LBRACKET && !translate) { // 左括号
                 ops.push(id); // 入符号栈
                 continue;
             }
-            if (id == RBRACKET) { // 右括号
+            if (id == RBRACKET && !translate) { // 右括号
                 while (ops.size()) { // 清空和其最近匹配的左括号内的所有操作
                     char op = ops.top();
                     ops.pop();
@@ -200,7 +215,7 @@ private:
                 }
                 continue;
             }
-            if (_reservedSymbol(id)) { // 保留字符（运算符）
+            if (_reservedSymbol(id) && !translate) { // 保留字符（运算符）
                 while (ops.size()) { // 清空符号栈里优先级比当前高的运算
                     char op = ops.top();
                     if (_privilege(id) > _privilege(op)) break; // 优先级没当前OP高
@@ -214,6 +229,7 @@ private:
             NfaGraph subgraph = fromSymbol(id);
             subgraphs.push(subgraph);
             symbols.insert(id); // 加入Symbol统计中
+            translate = false;
         }
         // 清空符号栈
         while (ops.size()) {

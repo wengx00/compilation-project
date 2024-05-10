@@ -81,4 +81,19 @@ inline std::string _replaceAll(std::string& str, std::string oldStr, std::string
     return str;
 }
 
+// 删除字符串里的转译字符
+inline std::string _removeEscape(std::string str, char escape = '\\') {
+    std::string result = "";
+    bool translate = false;
+    for (int i = 0; i < str.size(); ++i) {
+        if (!translate && str[i] == escape) {
+            translate = true;
+            continue;
+        }
+        translate = false;
+        result += str[i];
+    }
+    return result;
+}
+
 #endif
