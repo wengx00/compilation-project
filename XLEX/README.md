@@ -8,15 +8,43 @@
 
 > @Author: 20212131001 翁行
 
-## 编译运行
-
-> 本项目基于 macOS 14.4 开发，可以运行在 macOS 12.0+、Windows 10/11、Ubuntu 等操作系统中。
+本项目基于 macOS 14.4 开发，可以运行在 macOS 12.0+、Windows 10/11、Ubuntu 等操作系统中。
 
 项目使用 CMake 和 Ninja 编译，并且依赖 Qt 6.0+ 的 SDK
 
 为了抹平不同操作系统的编译产物差异，项目推荐使用 Ninja 配合 CMake 来编译。
 
 当然，你也可以在 macOS / Linux 下使用 CMake + Make，Windows 下使用 CMake + msbuild 来编译。
+
+## 依赖
+
+本项目使用了开源库 `yaml-cpp` 来解析 YAML 文件（输入正则表达式）
+
+开源地址：https://github.com/jbeder/yaml-cpp/releases/tag/0.8.0
+
+可以在本项目目录下的 `yaml-cpp-0.8.0` 中看到。
+
+在编译运行项目代码前，需要先将 yaml-cpp-0.8.0 编译成静态库
+
+1. 进入 `yaml-cpp-0.8.0` 目录
+
+2. 执行 CMake 构建
+
+   ```bash
+   cmake build -B build -G Ninja .
+   ```
+
+3. 进入 `yaml-cpp-0.8.0/build` 目录
+
+4. 执行 Ninja 构建
+
+   ```bash
+   ninja
+   ```
+
+成功后，即可看到 `yaml-cpp-0.8.0/build/libyaml-cpp.a` 静态库，将其移动到 `lib/yaml-cpp/` 目录下即可。
+
+## 编译运行
 
 ### 1. 使用 Visual Studio Code
 
