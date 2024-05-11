@@ -273,6 +273,14 @@ QString LexItemDialog::codeGenerate() {
         "\treturn false;\n"
         "}\n";
 
+    // 工具方法：string转小写
+    code +=
+        "string toLowerCase(string token) {\n"
+        "\tstring ret = \"\";\n"
+        "\tfor (auto c : token) ret += tolower(c);\n"
+        "\treturn ret;\n"
+        "}\n";
+
     // 处理Token的方法
     code +=
         "void handleToken(string token, ofstream& os) {\n"
@@ -372,6 +380,11 @@ QString LexItemDialog::codeGenerate() {
                 // 其他情况为错误情形
                 code +=
                     "\t\t\t\t\tdefault:\n"
+                    "\t\t\t\t\tif (id == '\\n' || id == ' ' || id == '\\t') {\n"
+                    "\t\t\t\t\t\tif (token.size() == 0) {\n"
+                    "\t\t\t\t\t\t\tbreak;\n"
+                    "\t\t\t\t\t\t}\n"
+                    "\t\t\t\t\t}\n"
                     "\t\t\t\t\t\tos << \"Error: Invalid input character. \" << '\\n';\n"
                     "\t\t\t\t\t\tcout << \"Error: Invalid input character. \" << '\\n';\n"
                     "\t\t\t\t\t\treturn 1;\n";

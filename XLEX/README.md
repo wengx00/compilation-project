@@ -44,6 +44,22 @@
 
 成功后，即可看到 `yaml-cpp-0.8.0/build/libyaml-cpp.a` 静态库，将其移动到 `lib/yaml-cpp/` 目录下即可。
 
+## 目录说明
+
+- `include`
+
+  - `yaml-cpp` 用于读取 YAML 文件的开源库头文件
+
+  - 其他为项目核心的 `.hpp` ｜ `.h` 文件，覆盖 NFA -> DFA -> MDFA 的核心逻辑
+
+- `lib`
+
+  - `yaml-cpp` yaml-cpp 编译后的静态库地址
+
+- `scripts` 编译/构建脚本
+
+- `yaml-cpp` 开源 YAML 库的源码，可用于编译成静态库放入 `lib/yaml-cpp`
+
 ## 编译运行
 
 ### 1. 使用 Visual Studio Code
@@ -88,8 +104,3 @@ ninja
 ### 3. 使用 Qt Creator
 
 直接在 Qt Creator 中打开该项目，然后选择对应的编译环境 Build -> Run 也可以一键启动
-
-## 变更记录
-
-代码全程使用 Git 进行变更追溯，并在 Github 私有仓库中贮存，截止 2024 年 5 月 10 日，变更历史如下
-![提交记录](https://img2.imgtp.com/2024/05/10/wuJyk5Lv.jpg)
