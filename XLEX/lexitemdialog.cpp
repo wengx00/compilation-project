@@ -29,7 +29,9 @@ LexItemDialog::~LexItemDialog() {
 void LexItemDialog::init(YAML::Node& doc) {
     // 所有保留字
     for (auto it = doc["RESERVED"].begin(); it != doc["RESERVED"].end(); ++it) {
-        reserved[it->second.as<std::string>()] = it->first.as<std::string>();
+        for (auto item : it->second) {
+            reserved[item.as<std::string>()] = it->first.as<std::string>();
+        }
     }
     // 所有OP
     for (auto it = doc["OP"].begin(); it != doc["OP"].end(); ++it) {
@@ -66,9 +68,6 @@ void LexItemDialog::init(YAML::Node& doc) {
 
     // 拼接总的正则表达式
     std::vector<std::string> tokens;
-    for (auto it = reserved.begin(); it != reserved.end(); ++it) {
-        tokens.push_back(it->first);
-    }
     for (auto it = op.begin(); it != op.end(); ++it) {
         tokens.push_back(it->first);
     }
@@ -269,8 +268,8 @@ QString LexItemDialog::codeGenerate() {
     code +=
         "bool isComment(string token) {\n"
         "\tif (token.size() < 2) return false;\n"
-        "\tif (token[0] == '/' && token[1] == '/') return true;\n"
-        "\treturn false;\n"
+        "\tif (token[0] >= 'a' && token[0] <= 'z' || token[0] >= 'A' && token[0] <= 'Z') return false;\n"
+        "\treturn true;\n"
         "}\n";
 
     // 工具方法：string转小写

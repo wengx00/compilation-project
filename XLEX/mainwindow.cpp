@@ -95,6 +95,14 @@ void MainWindow::on_parseFileAction_clicked() {
                 QMessageBox::warning(this, "警告", key + " 标识不是Key-Value对");
                 return;
             }
+            if (key == "RESERVED") {
+                for (auto it = value.begin(); it != value.end(); ++it) {
+                    if (!it->second.IsSequence()) {
+                        QMessageBox::warning(this, "警告", key + " 标识不是string数组");
+                        return;
+                    }
+                }
+            }
         }
         else if (key == "LETTER" || key == "DIGIT") {
             if (!value.IsSequence()) {

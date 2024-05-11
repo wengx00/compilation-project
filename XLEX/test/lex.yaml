@@ -1,12 +1,28 @@
 RESERVED:
-  IF: if
-  ELSE: else
-  THEN: then
-  END: end
-  REPEAT: repeat
-  UNTIL: until
-  READ: read
-  WRITE: write
+  IF:
+    - if
+    - IF
+  ELSE:
+    - else
+    - ELSE
+  THEN:
+    - then
+    - THEN
+  END:
+    - end
+    - END
+  REPEAT:
+    - repeat
+    - REPEAT
+  UNTIL:
+    - until
+    - UNTIL
+  READ:
+    - read
+    - READ
+  WRITE:
+    - write
+    - WRITE
 OP:
   MINUS: "-"
   DIVIDE: /
