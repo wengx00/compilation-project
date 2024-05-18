@@ -3,15 +3,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow), currentGrammer(nullptr)
-{
+    , ui(new Ui::MainWindow), currentGrammer(nullptr) {
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
     if (currentGrammer) delete currentGrammer;
 }
@@ -64,7 +62,7 @@ void MainWindow::renderDfaTable() {
     std::set<std::string> notEndSet = grammer.getNotEnd();
     std::string startToken = grammer.getStart();
     auto* table = ui->dfa;
-    table->setColumnCount(1+endSet.size()+notEndSet.size());
+    table->setColumnCount(1 + endSet.size() + notEndSet.size());
     table->setRowCount(dfa.size());
     QStringList header;
     header << "状态" << "状态内文法";
@@ -76,13 +74,13 @@ void MainWindow::renderDfaTable() {
         header << QString::fromStdString(token);
     }
     table->setHorizontalHeaderLabels(header);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     // 文法
     auto formula = grammer.getFormula();
     // 迭代生成cell
     for (int state = 0; state < (int)dfa.size(); ++state) {
-        QTableWidgetItem *id = new QTableWidgetItem(); // 状态编号
-        QTableWidgetItem *inner = new QTableWidgetItem(); // 状态内文法
+        QTableWidgetItem* id = new QTableWidgetItem(); // 状态编号
+        QTableWidgetItem* inner = new QTableWidgetItem(); // 状态内文法
 
         id->setText(QString::fromStdString(std::to_string(state)));
         table->setItem(state, 0, id); // 加入编号列
@@ -108,7 +106,7 @@ void MainWindow::renderDfaTable() {
             if (token == startToken) continue;
             int target = grammer.forward(state, token);
             if (target >= 0) {
-                QTableWidgetItem *item = new QTableWidgetItem();
+                QTableWidgetItem* item = new QTableWidgetItem();
                 item->setText(QString::fromStdString(std::to_string(target)));
                 table->setItem(state, col, item);
             }
@@ -117,7 +115,7 @@ void MainWindow::renderDfaTable() {
         for (auto& token : endSet) {
             int target = grammer.forward(state, token);
             if (target >= 0) {
-                QTableWidgetItem *item = new QTableWidgetItem();
+                QTableWidgetItem* item = new QTableWidgetItem();
                 item->setText(QString::fromStdString(std::to_string(target)));
                 table->setItem(state, col, item);
             }
@@ -154,11 +152,11 @@ void MainWindow::renderSlrTable() {
         header << QString::fromStdString(token);
     }
     table->setHorizontalHeaderLabels(header);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
     // Cell
     for (int state = 0; state < (int)dfa.size(); ++state) {
-        QTableWidgetItem *id = new QTableWidgetItem(); // 状态编号
+        QTableWidgetItem* id = new QTableWidgetItem(); // 状态编号
         id->setText(QString::number(state));
         table->setItem(state, 0, id);
 
@@ -167,17 +165,19 @@ void MainWindow::renderSlrTable() {
             if (token == startToken) continue;
             int target = grammer.forward(state, token);
             if (target > -1) {
-                QTableWidgetItem *end = new QTableWidgetItem(); // 状态编号
+                QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 end->setText("s" + QString::number(target));
                 table->setItem(state, column, end);
-            } else if ((target = grammer.backward(state, token)) > -1) {
-                QTableWidgetItem *end = new QTableWidgetItem(); // 状态编号
+            }
+            else if ((target = grammer.backward(state, token)) > -1) {
+                QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 Item& node = dfa[state][target];
                 if (node.key == startToken) {
                     end->setText("ACCEPT");
-                } else {
+                }
+                else {
                     QString endText = "r(" + QString::fromStdString(node.key) + "->";
-                    for (auto &token : formula[node.key][node.rawsIndex]) {
+                    for (auto& token : formula[node.key][node.rawsIndex]) {
                         endText += QString::fromStdString(token);
                     }
                     endText += ")";
@@ -190,17 +190,19 @@ void MainWindow::renderSlrTable() {
         for (auto& token : endSet) {
             int target = grammer.forward(state, token);
             if (target > -1) {
-                QTableWidgetItem *end = new QTableWidgetItem(); // 状态编号
+                QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 end->setText("s" + QString::number(target));
                 table->setItem(state, column, end);
-            } else if ((target = grammer.backward(state, token)) > -1) {
-                QTableWidgetItem *end = new QTableWidgetItem(); // 状态编号
+            }
+            else if ((target = grammer.backward(state, token)) > -1) {
+                QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 Item& node = dfa[state][target];
                 if (node.key == startToken) {
                     end->setText("ACCEPT");
-                } else {
+                }
+                else {
                     QString endText = "r(" + QString::fromStdString(node.key) + "->";
-                    for (auto &token : formula[node.key][node.rawsIndex]) {
+                    for (auto& token : formula[node.key][node.rawsIndex]) {
                         endText += QString::fromStdString(token);
                     }
                     endText += ")";
@@ -216,7 +218,7 @@ void MainWindow::renderSlrTable() {
 
 void MainWindow::on_toParseGrammer_clicked() {
     std::string grammerStr = ui->grammer->toPlainText().toStdString();
-    Grammer *grammer = new Grammer(grammerStr);
+    Grammer* grammer = new Grammer(grammerStr);
     currentGrammer = grammer;
     renderBasicInfo();
     if (!grammer->bad()) {
@@ -227,10 +229,10 @@ void MainWindow::on_toParseGrammer_clicked() {
 
 void MainWindow::on_chooseFile_clicked() {
     // 获取文件名
-    QString fileName{QFileDialog::getOpenFileName(
-        this, "打开源文件", ".", "文本文件(*.txt, *)")};
+    QString fileName{ QFileDialog::getOpenFileName(
+        this, "打开源文件", ".", "文本文件(*.txt, *)") };
     // 构造文件对象
-    QFile file{fileName};
+    QFile file{ fileName };
 
     if (fileName.isEmpty())
         return;
@@ -265,8 +267,7 @@ void MainWindow::on_saveFile_clicked() {
     QMessageBox::information(this, "提示", "文件保存成功");
 }
 
-void MainWindow::on_toParseStatement_clicked()
-{
+void MainWindow::on_toParseStatement_clicked() {
     QString statement = ui->statement->toPlainText();
     if (statement.isEmpty()) {
         QMessageBox::information(this, "提示", "请输入待解析语句");
@@ -280,24 +281,19 @@ void MainWindow::on_toParseStatement_clicked()
     Grammer& grammer = *currentGrammer;
     ParsedResult result = grammer.parse(statement.toStdString());
     auto* table = ui->parseProcess;
-    table->setColumnCount(3);
+    table->setColumnCount(2);
     table->setRowCount(result.outputs.size() + 1);
     QStringList header;
-    header << "输入"
-           << "操作"
-           << "输出";
+    header << "操作" << "输出";
     table->setHorizontalHeaderLabels(header);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    for (int i = 0; i < result.inputs.size(); ++i) {
-        auto* input = new QTableWidgetItem();
+    for (int i = 0; i < result.outputs.size(); ++i) {
         auto* output = new QTableWidgetItem();
         auto* action = new QTableWidgetItem();
-        input->setText(QString::fromStdString(result.inputs[i]));
         output->setText(QString::fromStdString(result.outputs[i]));
         action->setText(QString::fromStdString(result.routes[i]));
-        table->setItem(i, 0, input);
-        table->setItem(i, 2, output);
-        table->setItem(i, 1, action);
+        table->setItem(i, 1, output);
+        table->setItem(i, 0, action);
     }
     auto* status = new QTableWidgetItem();
     status->setText(result.accept ? "接收" : "出错");

@@ -1,3 +1,8 @@
+/*
+ * @Author: wengx00 wengx86@163.com
+ * @Date: 2023-12-16 20:16:38
+ * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ */
 #include <vector>
 #include <set>
 #include <map>
@@ -17,17 +22,22 @@ struct Item {
     int rawsIndex; // 推导式编号
     int rawIndex; // 推导式内编号
 
-    Item(std::string key, ItemType type, int rawsIndex, int rawIndex): key(key), type(type), rawsIndex(rawsIndex), rawIndex(rawIndex) {}
+    Item(std::string key, ItemType type, int rawsIndex, int rawIndex) : key(key), type(type), rawsIndex(rawsIndex), rawIndex(rawIndex) {}
 
     bool operator==(const Item& node) const {
         return node.key == key && node.type == type && node.rawsIndex == rawsIndex && node.rawIndex == rawIndex;
+    }
+
+    // 获取唯一标识
+    std::string id() {
+        return key + std::to_string(type) + std::to_string(rawsIndex) + std::to_string(rawIndex);
     }
 };
 
 // 句子分析结果
 struct ParsedResult {
     std::vector<std::string> outputs;
-    std::vector<std::string> inputs;
+    // std::vector<std::string> inputs;
     std::vector<std::string> routes;
 
     bool accept = false; // 是否接受

@@ -1,3 +1,8 @@
+/*
+ * @Author: wengx00 wengx86@163.com
+ * @Date: 2023-12-16 22:04:11
+ * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ */
 #include "grammer.h"
 #include <iostream>
 #include <queue>
@@ -23,12 +28,20 @@ Grammer::Grammer(string input) {
     }
     for (int i = 0; i < lines.size(); ++i) {
         string line = lines[i];
+        if (line.size() == 0) continue;
         string key;
+        string token;
         vector<string> raws;
         bool behind = false;
         for (int j = 0; j < line.size(); ++j) {
-            if (line[j] == ' ')
+            if (line[j] == ' ') {
+                // 分词
+                if (behind && token.size()) {
+                    raws.push_back(token);
+                    token.clear();
+                }
                 continue;
+            }
             if (line[j] == '-' && j < line.size() - 2 && line[j + 1] == '>') {
                 // ->
                 behind = true;
@@ -41,20 +54,24 @@ Grammer::Grammer(string input) {
                     return;
                 }
                 // ｜需要分割
+                if (token.size()) {
+                    raws.push_back(token);
+                    token.clear();
+                }
                 formula[key].push_back(raws);
                 raws.clear();
                 continue;
             }
             // Common Symbol
             if (!behind) {
-                if (key.size()) {
-                    error = "文法左式不支持多字符";
-                    return;
-                }
                 key += line[j];
                 continue;
             }
-            raws.push_back(string(1, line[j]));
+            token.push_back(line[j]);
+            if (j == line.size() - 1) {
+                raws.push_back(token);
+                token.clear();
+            }
         }
         if (!behind) {
             error = "文法输入有误";
@@ -63,8 +80,9 @@ Grammer::Grammer(string input) {
         if (!raws.empty()) {
             formula[key].push_back(raws);
         }
-        if (i == 0)
+        if (i == 0) {
             start = key;
+        }
     }
     // 拓广文法
     formula[start + '\''].push_back(vector<string>(1, start));
@@ -228,7 +246,6 @@ void Grammer::extend(vector<Item>& nodes) {
                     break;
             }
             // 新增节点，指示了Key对应的第i个推导式的第rawOffset个字符
-            // 如果开头存在了EPSILON，则节点类型为规约
             Item instance(cur,
                 rawOffset == 0 ? ItemType::FORWARD : ItemType::BACKWARD, j,
                 rawOffset);
@@ -252,8 +269,9 @@ void Grammer::initRelation() {
     isSLR = true; // 暂时先是
     // 遍历每一个DFA节点
     for (int cur = 0; cur < dfa.size(); ++cur) {
-        // forwards[cur]和backwards[cur]分别记录了移进和规约关系
+        cout << "Current State" << cur << '\n';
         extend(cur); // 扩展当前DFA节点(可能右侧项目含有非终结符号)
+        // forwards[cur]和backwards[cur]分别记录了移进和规约关系
         // 遍历DFA节点上的每一个项目
         for (int it = 0; it < dfa[cur].size(); ++it) {
             Item& item = dfa[cur][it]; // 取出当前项
@@ -338,10 +356,15 @@ void Grammer::initIsSLR() {
 int Grammer::findState(vector<Item>& current) {
     for (int i = 0; i < dfa.size(); ++i) {
         auto& state = dfa[i];
+        // if (current.size() != state.size()) continue;
         bool exist = true;
-        if (current.size() != state.size()) continue;
+        // 拿个map存state加快查询速度
+        unordered_map<string, int> stateMap;
+        for (int j = 0; j < state.size(); ++j) {
+            stateMap[state[j].id()] = j;
+        }
         for (auto& node : current) {
-            if (!count(state.begin(), state.end(), node)) {
+            if (!stateMap.count(node.id())) {
                 exist = false;
                 break;
             }
@@ -376,12 +399,12 @@ string Grammer::getExtraGrammer() {
         visited[cur] = true;
         vector<vector<string>> rawsOfCur = formula[cur];
         for (auto& raw : rawsOfCur) {
-            ss << cur << " -> ";
+            ss << cur << " ->";
             for (auto& token : raw) {
                 if (notEnd.count(token)) {
                     ready.push(token);
                 }
-                ss << token;
+                ss << ' ' << token;
             }
             ss << '\n';
         }
@@ -410,19 +433,39 @@ int Grammer::backward(int state, string key) {
 }
 
 ParsedResult Grammer::parse(string input) {
-    string str;
-    for (auto& s : input) {
-        if (s != ' ' && s != '\n') str += s;
+    // input 是lex文件 LABEL : VALUE
+    queue<pair<string, string>> lex;
+    string label;
+    string value;
+    bool isLabel = true;
+    for (char c : input) {
+        if (c == ' ') {
+            continue;
+        }
+        if (c == '\n') {
+            if (label.size()) {
+                lex.push({ label, value });
+            }
+            label.clear();
+            value.clear();
+            isLabel = true;
+            continue;
+        }
+        if (c == ':' && isLabel) {
+            isLabel = false;
+            continue;
+        }
+        if (isLabel) {
+            label += c;
+        }
+        else {
+            value += c;
+        }
     }
     ParsedResult result;
     string output;
-    queue<string> inputs;
     vector<int> stash;
-
-    for (const char& c : input) {
-        inputs.push(string(1, c));
-    }
-    inputs.push(END_FLAG);
+    lex.push({ END_FLAG, END_FLAG });
     int state = 0; // 当前DFA状态编号
     int count = 0;
     stringstream ss;
@@ -432,12 +475,13 @@ ParsedResult Grammer::parse(string input) {
         map<string, int>& curForwards = forwards[state]; // 当前所有可移进状态
         map<string, int>& curBackwards = backwards[state]; // 当前所有可规约状态
 
-        string token = inputs.front(); // 当前输入的字符
+        auto pair = lex.front(); // 当前输入的字符
+        string token = pair.first;
         stash.push_back(state); // 当前状态入栈
 
         if (curForwards.count(token)) {
             // 找到了移进关系
-            inputs.pop();
+            lex.pop();
             ++count;
             int next = curForwards[token]; // 下一个状态
             ss << "在状态" << state << "通过" << token << "移进到状态" << next;
@@ -445,7 +489,6 @@ ParsedResult Grammer::parse(string input) {
             output += token;
             result.outputs.push_back(output);
             result.routes.push_back(ss.str());
-            result.inputs.push_back(str.substr(count));
             continue;
         }
         if (curBackwards.count(token)) {
@@ -453,12 +496,6 @@ ParsedResult Grammer::parse(string input) {
             int target = curBackwards[token];
             ss << "在状态" << state << "通过" << token << "规约到状态" << target;
             Item& node = dfa[state][target];
-            if (count >= str.size()) {
-                result.inputs.push_back("");
-            }
-            else {
-                result.inputs.push_back(str.substr(count));
-            }
             result.routes.push_back(ss.str());
             if (node.key == start) {
                 // 接收
