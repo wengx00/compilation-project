@@ -260,7 +260,7 @@ QString LexItemDialog::codeGenerate() {
     code +=
         "bool isNumber(string token) {\n"
         "\tif (token.size() < 1) return false;\n"
-        "\tif (token[0] > '0' && token[0] < '9') return true;\n"
+        "\tif (token[0] >= '0' && token[0] <= '9') return true;\n"
         "\treturn false;\n"
         "}\n";
 
