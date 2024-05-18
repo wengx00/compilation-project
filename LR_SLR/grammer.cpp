@@ -462,6 +462,9 @@ ParsedResult Grammer::parse(string input) {
             value += c;
         }
     }
+    if (label.size() && !isLabel) {
+        lex.push({ label, value });
+    }
     ParsedResult result;
     string output;
     vector<int> stash;
