@@ -1,0 +1,83 @@
+{ 0: -1 }
+program -> stmt-sequence
+
+{ 0: 0, 2: 1 }
+stmt-sequence -> stmt-sequence semi statement
+{ 0: 0 }
+stmt-sequence -> statement
+
+{ 0: -1 }
+statement -> if-stmt
+{ 0: -1 }
+statement -> repeat-stmt
+{ 0: -1 }
+statement -> assign-stmt
+{ 0: -1 }
+statement -> read-stmt
+{ 0: -1 }
+statement -> write-stmt
+
+{ 0: -1, 1: 0, 3: 1 }
+if-stmt -> if exp then stmt-sequence end
+{ 0: -1, 1: 0, 3: 1, 5: 2 }
+if-stmt -> if exp then stmt-sequence else stmt-sequence end
+
+{ 0: -1, 1: 0, 3: 1 }
+repeat-stmt -> repeat stmt-sequence until exp
+
+{ 0: 0, 1: -1, 2: 1  }
+assign-stmt -> identifier assign exp
+
+{ 0: -1, 1: 0 }
+read-stmt -> read identifier
+
+{ 0: -1, 1: 0 }
+write-stmt -> write exp
+
+{ 0: 0, 1: -1, 2: 1 }
+exp -> simple-exp comparison-op simple-exp 
+{ 0: -1 }
+exp -> simple-exp
+
+{ 0: -1 }
+comparison-op -> lt 
+{ 0: -1 }
+comparison-op -> equal 
+{ 0: -1 }
+comparison-op -> lte
+{ 0: -1 }
+comparison-op -> not_equal
+{ 0: -1 }
+comparison-op -> gte
+{ 0: -1 }
+comparison-op -> gt
+
+{ 0: 0, 1: -1, 2: 1 }
+simple-exp -> simple-exp addop term
+{ 0: -1 }
+simple-exp -> term 
+
+{ 0: -1 }
+addop-> plus
+{ 0: -1 }
+addop -> minus
+
+{ 0: 0, 1: -1, 2: 1 }
+term -> term mulop factor
+{ 0: -1 }
+term -> factor 
+
+{ 0: -1 }
+mulop -> time
+{ 0: -1 }
+mulop -> divide
+{ 0: -1 }
+mulop -> mod
+
+{ 1: -1 }
+factor -> ( exp )
+{ 0: -1 }
+factor -> number
+{ 0: -1 }
+factor -> identifier
+
