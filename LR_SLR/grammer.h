@@ -16,6 +16,7 @@ enum ItemType {
     BACKWARD
 };
 
+// DFA节点项目
 struct Item {
     std::string key; // 所属非终结符号
     ItemType type; // 递进还是规约
@@ -44,6 +45,7 @@ struct ParsedResult {
     std::string error = ""; // 错误信息，空则无出错
 };
 
+// BNF 文法类
 class Grammer {
 private:
     std::map<std::string, std::vector<std::vector<std::string> > > formula; // 分式
@@ -88,4 +90,19 @@ public:
     std::string getStart();
 
     ParsedResult parse(std::string);
+};
+
+// 语法树节点
+class TreeNode {
+public:
+    // 孩子节点
+    std::vector<TreeNode*> children;
+    // 父节点
+    TreeNode* parent;
+    // 下一兄弟节点
+    TreeNode* sibling;
+    // Label
+    std::string label;
+    // Value
+    std::string value;
 };
