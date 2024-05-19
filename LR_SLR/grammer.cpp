@@ -26,14 +26,59 @@ Grammer::Grammer(string input) {
         error = "未输入任何文法";
         return;
     }
+    map<int, int> action;
+    bool isStartToken = true;
     for (int i = 0; i < lines.size(); ++i) {
         string line = lines[i];
         if (line.size() == 0) continue;
+        int begin = 0;
+        int end = line.size() - 1;
+        // 找到非空子串
+        while (line[begin] == ' ') {
+            begin += 1;
+        }
+        while (line[end] == ' ') {
+            end -= 1;
+        }
+        if (end - begin <= 0) {
+            continue;
+        }
+        if (line[begin] == '{' && line[end] == '}') {
+            // 语义规则
+            bool isValue = false;
+            string curIndex;
+            string curValue;
+            for (int j = begin + 1; j <= end; ++j) {
+                if (line[j] == ' ') continue;
+                if (line[j] == ':' && !isValue) {
+                    isValue = true;
+                    continue;
+                }
+                if (line[j] == ',' || line[j] == '}') {
+                    if (!isValue || !curIndex.size() || !curValue.size()) {
+                        error = "语义规则输入有误";
+                        return;
+                    }
+                    action[stoi(curIndex)] = stoi(curValue);
+                    curIndex.clear();
+                    curValue.clear();
+                    isValue = false;
+                    continue;
+                }
+                if (!isValue) {
+                    curIndex.push_back(line[j]);
+                }
+                else {
+                    curValue.push_back(line[j]);
+                }
+            }
+            continue;
+        }
         string key;
         string token;
         vector<string> raws;
         bool behind = false;
-        for (int j = 0; j < line.size(); ++j) {
+        for (int j = begin; j <= end; ++j) {
             if (line[j] == ' ') {
                 // 分词
                 if (behind && token.size()) {
@@ -42,7 +87,7 @@ Grammer::Grammer(string input) {
                 }
                 continue;
             }
-            if (line[j] == '-' && j < line.size() - 2 && line[j + 1] == '>') {
+            if (line[j] == '-' && j < end - 1 && line[j + 1] == '>') {
                 // ->
                 behind = true;
                 j++;
@@ -68,7 +113,7 @@ Grammer::Grammer(string input) {
                 continue;
             }
             token.push_back(line[j]);
-            if (j == line.size() - 1) {
+            if (j == end) {
                 raws.push_back(token);
                 token.clear();
             }
@@ -80,9 +125,17 @@ Grammer::Grammer(string input) {
         if (!raws.empty()) {
             formula[key].push_back(raws);
         }
-        if (i == 0) {
+        if (isStartToken) {
             start = key;
+            isStartToken = false;
         }
+        // 映射语义规则
+        if (action.empty()) {
+            error = "语义规则输入有误";
+            return;
+        }
+        actions[key].push_back(action);
+        action.clear();
     }
     // 拓广文法
     formula[start + '\''].push_back(vector<string>(1, start));

@@ -47,6 +47,7 @@ struct ParsedResult {
 class Grammer {
 private:
     std::map<std::string, std::vector<std::vector<std::string> > > formula; // 分式
+    std::map<std::string, std::vector<std::map<int, int> > > actions; // 语义动作
     std::string start; // 起始
     std::map<std::string, std::set<std::string> > first; // FIRST集合元素
     std::map<std::string, std::set<std::string> > follow; // FOLLOW集合元素
