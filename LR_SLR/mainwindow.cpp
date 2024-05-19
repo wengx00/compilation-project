@@ -23,7 +23,6 @@ void MainWindow::renderBasicInfo() {
     QString error = QString::fromStdString(grammer.getError());
     if (error.isEmpty()) error = "未发现错误";
     ui->syntaxError->setPlainText(error);
-    ui->syntaxType->setPlainText(grammer.slr() ? "SLR文法" : grammer.bad() ? "错误文法" : "LR文法\n" + QString::fromStdString(grammer.getReason()));
     QString followSet, firstSet;
     // 渲染非终结节点的Follow集合和First集合
     std::set<std::string> notEnd = grammer.getNotEnd();
@@ -128,10 +127,6 @@ void MainWindow::renderDfaTable() {
 
 void MainWindow::renderSlrTable() {
     Grammer& grammer = *currentGrammer;
-    if (!grammer.slr()) {
-        return;
-    }
-    // 是SLR(1)文法
     std::set<std::string> endSet = grammer.getEnd();
     std::set<std::string> notEndSet = grammer.getNotEnd();
     std::string startToken = grammer.getStart();
@@ -278,30 +273,30 @@ void MainWindow::on_toParseStatement_clicked() {
         return;
     }
     qDebug() << "待解析语句: " << statement;
-    Grammer& grammer = *currentGrammer;
-    ParsedResult result = grammer.parse(statement.toStdString());
-    auto* table = ui->parseProcess;
-    table->setColumnCount(2);
-    table->setRowCount(result.outputs.size() + 1);
-    QStringList header;
-    header << "操作" << "输出";
-    table->setHorizontalHeaderLabels(header);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    for (int i = 0; i < result.outputs.size(); ++i) {
-        auto* output = new QTableWidgetItem();
-        auto* action = new QTableWidgetItem();
-        output->setText(QString::fromStdString(result.outputs[i]));
-        action->setText(QString::fromStdString(result.routes[i]));
-        table->setItem(i, 1, output);
-        table->setItem(i, 0, action);
-    }
-    auto* status = new QTableWidgetItem();
-    status->setText(result.accept ? "接收" : "出错");
-    table->setItem(result.outputs.size(), 0, status);
-    if (result.error.size()) {
-        auto* reason = new QTableWidgetItem();
-        reason->setText(QString::fromStdString(result.error));
-        table->setItem(result.outputs.size(), 1, reason);
-    }
+    // Grammer& grammer = *currentGrammer;
+    // ParsedResult result = grammer.parse(statement.toStdString());
+    // auto* table = ui->parseProcess;
+    // table->setColumnCount(2);
+    // table->setRowCount(result.outputs.size() + 1);
+    // QStringList header;
+    // header << "操作" << "输出";
+    // table->setHorizontalHeaderLabels(header);
+    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    // for (int i = 0; i < result.outputs.size(); ++i) {
+    //     auto* output = new QTableWidgetItem();
+    //     auto* action = new QTableWidgetItem();
+    //     output->setText(QString::fromStdString(result.outputs[i]));
+    //     action->setText(QString::fromStdString(result.routes[i]));
+    //     table->setItem(i, 1, output);
+    //     table->setItem(i, 0, action);
+    // }
+    // auto* status = new QTableWidgetItem();
+    // status->setText(result.accept ? "接收" : "出错");
+    // table->setItem(result.outputs.size(), 0, status);
+    // if (result.error.size()) {
+    //     auto* reason = new QTableWidgetItem();
+    //     reason->setText(QString::fromStdString(result.error));
+    //     table->setItem(result.outputs.size(), 1, reason);
+    // }
 }
 
