@@ -35,11 +35,25 @@ struct Item {
     }
 };
 
+// 语法树节点
+class TreeNode {
+public:
+    // 孩子节点
+    std::vector<TreeNode*> children;
+    // 父节点
+    TreeNode* parent;
+    // Label
+    std::string label;
+    // Value
+    std::string value;
+};
+
 // 句子分析结果
 struct ParsedResult {
     std::vector<std::string> outputs;
     // std::vector<std::string> inputs;
     std::vector<std::string> routes;
+    TreeNode* root; // 语法树
 
     bool accept = false; // 是否接受
     std::string error = ""; // 错误信息，空则无出错
@@ -90,19 +104,4 @@ public:
     std::string getStart();
 
     ParsedResult parse(std::string);
-};
-
-// 语法树节点
-class TreeNode {
-public:
-    // 孩子节点
-    std::vector<TreeNode*> children;
-    // 父节点
-    TreeNode* parent;
-    // 下一兄弟节点
-    TreeNode* sibling;
-    // Label
-    std::string label;
-    // Value
-    std::string value;
 };

@@ -1,3 +1,8 @@
+/*
+ * @Author: wengx00 wengx86@163.com
+ * @Date: 2023-12-17 00:49:57
+ * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ */
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
@@ -273,8 +278,8 @@ void MainWindow::on_toParseStatement_clicked() {
         return;
     }
     qDebug() << "待解析语句: " << statement;
-    // Grammer& grammer = *currentGrammer;
-    // ParsedResult result = grammer.parse(statement.toStdString());
+    Grammer& grammer = *currentGrammer;
+    ParsedResult result = grammer.parse(statement.toStdString());
     // auto* table = ui->parseProcess;
     // table->setColumnCount(2);
     // table->setRowCount(result.outputs.size() + 1);

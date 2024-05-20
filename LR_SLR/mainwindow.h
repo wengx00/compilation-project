@@ -1,3 +1,8 @@
+/*
+ * @Author: wengx00 wengx86@163.com
+ * @Date: 2023-12-16 21:46:02
+ * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ */
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -8,12 +13,11 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -26,7 +30,7 @@ private slots:
     void on_toParseStatement_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
     void renderBasicInfo();
     void renderDfaTable();
     void renderSlrTable();

@@ -138,8 +138,8 @@ Grammer::Grammer(string input) {
         action.clear();
     }
     // 拓广文法
-    formula[start + '\''].push_back(vector<string>(1, start));
-    start = start + '\'';
+    // formula[start + '\''].push_back(vector<string>(1, start));
+    // start = start + '\'';
 
     // 构建非终结符号集
     for (auto it = formula.begin(); it != formula.end(); ++it) {
@@ -521,6 +521,8 @@ ParsedResult Grammer::parse(string input) {
     ParsedResult result;
     string output;
     vector<int> stash;
+    // 在工作区的TreeNode
+    vector<TreeNode*> workspace;
     lex.push({ END_FLAG, END_FLAG });
     int state = 0; // 当前DFA状态编号
     int count = 0;
@@ -533,6 +535,7 @@ ParsedResult Grammer::parse(string input) {
 
         auto pair = lex.front(); // 当前输入的字符
         string token = pair.first;
+        string value = pair.second;
         stash.push_back(state); // 当前状态入栈
 
         if (curForwards.count(token)) {
@@ -544,6 +547,10 @@ ParsedResult Grammer::parse(string input) {
             state = next;
             output += token;
             result.outputs.push_back(output);
+            TreeNode* current = new TreeNode;
+            current->label = token;
+            current->value = value;
+            workspace.push_back(current);
             result.routes.push_back(ss.str());
             continue;
         }
@@ -551,15 +558,59 @@ ParsedResult Grammer::parse(string input) {
             // 找到了规约关系
             int target = curBackwards[token];
             ss << "在状态" << state << "通过" << token << "规约到状态" << target;
-            Item& node = dfa[state][target];
+            Item& item = dfa[state][target];
+            vector<string>& raws = formula[item.key][item.rawsIndex];
+            // 生成语法树节点
+            map<int, int> action = actions[item.key][item.rawsIndex];
             result.routes.push_back(ss.str());
-            if (node.key == start) {
+            TreeNode* current = new TreeNode;
+            current->label = item.key;
+            int offset = workspace.size() - raws.size();
+            if (offset < 0) {
+                result.error = "语法树解析错误";
+                return result;
+            }
+            for (int i = 0; i < raws.size(); i++) {
+                int index = raws.size() - 1 - i;
+                if (!action.count(index) || action[index] < -1) {
+                    continue;
+                }
+                if (action[index] == -1) {
+                    // 作为树根
+                    if (workspace[index + offset]->children.size() > 0 && current->children.size() > 0) {
+                        result.error = "语法树解析错误";
+                        return result;
+                    }
+                    if (workspace[index + offset]->children.size() == 0) {
+                        for (auto child : current->children) {
+                            if (child) {
+                                child->parent = workspace[index + offset];
+                            }
+                        }
+                        workspace[index + offset]->children = current->children;
+                    }
+                    current = workspace[index + offset];
+                    continue;
+                }
+                TreeNode* child = workspace[index + offset];
+                if (action[index] >= current->children.size()) {
+                    // 扩容
+                    current->children.resize(action[index] + 1);
+                }
+                current->children[action[index]] = child;
+                child->parent = current;
+            }
+            // 出栈
+            workspace.erase(workspace.begin() + offset, workspace.end());
+            // 将新生成的节点入栈
+            workspace.push_back(current);
+
+            if (item.key == start) {
                 // 接收
                 result.accept = true;
                 result.outputs.push_back(start);
                 break;
             }
-            vector<string>& raws = formula[node.key][node.rawsIndex];
             int useful = 0;
             for (int i = 0; i < raws.size(); ++i) {
                 // 找到不是EPSILON的大小
@@ -569,9 +620,9 @@ ParsedResult Grammer::parse(string input) {
                 output.erase(output.end() - useful, output.end());
                 stash.erase(stash.end() - useful, stash.end());
             }
-            int next = forwards[stash[stash.size() - 1]][node.key];
+            int next = forwards[stash[stash.size() - 1]][item.key];
             state = next;
-            output += node.key;
+            output += item.key;
             result.outputs.push_back(output);
             continue;
         }
@@ -579,6 +630,10 @@ ParsedResult Grammer::parse(string input) {
         ss << "在状态" << state << "上找不到" << token << "对应的移进/规约关系";
         result.error = ss.str();
         break;
+    }
+    if (workspace.size() != 1) {
+        error = "语法树解析错误";
+        return result;
     }
     return result;
 }
