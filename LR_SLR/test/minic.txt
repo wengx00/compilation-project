@@ -1,0 +1,130 @@
+
+{ 0: -1 }
+program -> definition-list
+{ 0: 0, 1: 1 }
+definition-list -> definition-list definition 
+{ 0: -1 }
+definition-list -> definition
+{ 0: -1 }
+definition -> variable-definition 
+{ 0: -1 }
+definition -> function-definition
+{ 0: 0, 1: 1 }
+variable-definition-> type-indicator IDENTIFIER semi
+{ 0: 0, 1: 1, 3: 2 }
+variable-definition -> type-indicator IDENTIFIER lm_bracket NUMBER rm_bracket semi
+{ 0: -1 }
+type-indicator -> int
+{ 0: -1 }
+type-indicator -> float
+{ 0: -1 }
+type-indicator -> double
+{ 0: -1 }
+type-indicator -> void
+{ 0: 0, 1: 1, 3: 2, 5: 3 }
+function-definition -> type-indicator IDENTIFIER lbracket parameters rbracket compound-stmt
+{ 0: -1 }
+parameters -> parameter-list
+{ 0: -1 }
+parameters -> void
+{ 0: 0, 2: 1 }
+parameter-list -> parameter-list coma parameter
+{ 0: -1 }
+parameter-list -> parameter
+{ 0: 0, 1: 1 }
+parameter -> type-indicator IDENTIFIER
+{ 0: 0, 1: 1, 2: 2 }
+parameter -> type-indicator IDENTIFIER lm_bracket rm_bracket
+{ 1: 0, 2: 1 }
+compound-stmt -> lb_bracket local-definitions statement-list rb_bracket
+{ 0: 0, 1: 1 }
+local-definitions -> local-definitions variable-definition
+{}
+local-definitions -> empty
+{ 0: 0, 1: 1 }
+statement-list -> statement-list statement
+{}
+statement-list -> empty
+{ 0: -1 }
+statement -> expression-stmt
+{ 0: -1 }
+statement -> compound-stmt
+{ 0: -1 }
+statement -> condition-stmt
+{ 0: -1 }
+statement -> dowhile-stmt
+{ 0: -1 }
+statement -> return-stmt
+{ 0: 0 }
+expression-stmt -> expression semi
+{}
+expression-stmt -> semi
+{ 0: -1, 2: 0, 4: 1 }
+condition-stmt -> if lbracket expression rbracket statement
+{ 0: -1, 2: 0, 4: 1, 6: 2 }
+condition-stmt -> if lbracket expression rbracket statement else statement
+{ 1: 0, 2: -1, 4: 1 }
+dowhile-stmt -> do statement while lbracket expression rbracket semi
+{}
+return-stmt -> return semi
+{ 1: 0 }
+return-stmt -> return expression semi
+{ 0: 0, 1: -1, 2: 1 }
+expression-> variable assign expression
+{ 0: -1 }
+expression -> simple-expression
+{ 0: 0 }
+variable -> IDENTIFIER
+{ 0: 0, 2: 1 }
+variable -> IDENTIFIER lm_bracket expression rm_bracket
+{ 0: 0, 1: -1, 2: 1 }
+simple-expression -> additive-expression relop additive-expression
+{ 0: -1 }
+simple-expression -> additive-expression
+{ 0: -1 }
+relop -> lte
+{ 0: -1 }
+relop -> lt
+{ 0: -1 }
+relop -> gt
+{ 0: -1 }
+relop -> gte
+{ 0: -1 }
+relop -> equal
+{ 0: -1 }
+relop -> not_equal
+{ 0: 0, 1: -1, 2: 1 }
+additive-expression -> additive-expression addop term
+{ 0: -1 }
+additive-expression -> term
+{ 0: -1 }
+addop -> +
+{ 0: -1 }
+addop -> -
+term -> term mulop factor
+{ 0: -1 }
+term -> factor
+{ 0: -1 }
+mulop -> *
+{ 0: -1 }
+mulop -> /
+{ 0: -1 }
+mulop -> %
+{ 1: -1 }
+factor -> lbracket expression rbracket
+{ 0: -1 }
+factor -> variable
+{ 0: -1 }
+factor -> call
+{ 0: -1 }
+factor -> NUMBER
+{ 0: 0, 2: 1 }
+call -> IDENTIFIER lbracket arguments rbracket
+{ 0: -1 }
+arguments -> argument-list
+{}
+arguments -> empty
+{ 0: 0, 2: 1 }
+argument-list -> argument-list comma expression
+{ 0: -1 }
+argument-list -> expression

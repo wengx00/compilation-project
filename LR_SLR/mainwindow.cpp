@@ -280,28 +280,35 @@ void MainWindow::on_toParseStatement_clicked() {
     qDebug() << "待解析语句: " << statement;
     Grammer& grammer = *currentGrammer;
     ParsedResult result = grammer.parse(statement.toStdString());
-    // auto* table = ui->parseProcess;
-    // table->setColumnCount(2);
-    // table->setRowCount(result.outputs.size() + 1);
-    // QStringList header;
-    // header << "操作" << "输出";
-    // table->setHorizontalHeaderLabels(header);
-    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    // for (int i = 0; i < result.outputs.size(); ++i) {
-    //     auto* output = new QTableWidgetItem();
-    //     auto* action = new QTableWidgetItem();
-    //     output->setText(QString::fromStdString(result.outputs[i]));
-    //     action->setText(QString::fromStdString(result.routes[i]));
-    //     table->setItem(i, 1, output);
-    //     table->setItem(i, 0, action);
-    // }
-    // auto* status = new QTableWidgetItem();
-    // status->setText(result.accept ? "接收" : "出错");
-    // table->setItem(result.outputs.size(), 0, status);
-    // if (result.error.size()) {
-    //     auto* reason = new QTableWidgetItem();
-    //     reason->setText(QString::fromStdString(result.error));
-    //     table->setItem(result.outputs.size(), 1, reason);
-    // }
+    ui->treeWidget->clear();
+    if (result.error.size() == 0) {
+        traverseTree(result.root, 0);
+        QMessageBox::information(this, "提示", "语法树解析成功");
+    }
+    else {
+        QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget);
+        item->setText(0, QString::fromStdString(result.error));
+        QMessageBox::warning(this, "提示", "语法树解析失败");
+    }
+}
+
+
+// 遍历树
+void MainWindow::traverseTree(TreeNode* tree, QTreeWidgetItem* p) {
+    if (tree == NULL) return;
+    QTreeWidgetItem* item;
+    if (p == 0)
+        item = new QTreeWidgetItem(ui->treeWidget);
+    else
+        item = new QTreeWidgetItem(p);
+    QString text = QString::fromStdString(tree->label);
+    if (tree->value.size()) {
+        text += " : " + QString::fromStdString(tree->value);
+    }
+    item->setText(0, text);
+    item->setForeground(0, Qt::black);
+    for (TreeNode* child : tree->children) {
+        traverseTree(child, item);
+    }
 }
 

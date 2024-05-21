@@ -1,5 +1,8 @@
 {
     "files.associations": {
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
         "qmainwindow": "cpp",
         "vector": "cpp",
         "iosfwd": "cpp",
@@ -58,6 +61,7 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "unordered_map": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "list": "cpp"
     }
 }

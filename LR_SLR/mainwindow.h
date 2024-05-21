@@ -7,6 +7,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTreeWidgetItem>
 #include "grammer.h"
 
 QT_BEGIN_NAMESPACE
@@ -34,6 +35,7 @@ private:
     void renderBasicInfo();
     void renderDfaTable();
     void renderSlrTable();
+    void traverseTree(TreeNode*, QTreeWidgetItem*);
     Grammer* currentGrammer;
 };
 #endif // MAINWINDOW_H

@@ -635,5 +635,7 @@ ParsedResult Grammer::parse(string input) {
         error = "语法树解析错误";
         return result;
     }
+    result.root = workspace[0];
+    workspace.pop_back();
     return result;
 }

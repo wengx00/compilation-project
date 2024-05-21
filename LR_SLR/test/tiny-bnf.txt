@@ -75,7 +75,7 @@ mulop -> divide
 mulop -> mod
 
 { 1: -1 }
-factor -> ( exp )
+factor -> lbracket exp rbracket
 { 0: -1 }
 factor -> number
 { 0: -1 }
