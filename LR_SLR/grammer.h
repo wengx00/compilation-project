@@ -8,7 +8,7 @@
 #include <map>
 #include <string>
 
-#define EPSILON "@"
+#define EPSILON "EPSILON"
 #define END_FLAG "$"
 
 enum ItemType {

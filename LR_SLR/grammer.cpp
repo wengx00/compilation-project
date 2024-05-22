@@ -55,7 +55,10 @@ Grammer::Grammer(string input) {
                     continue;
                 }
                 if (line[j] == ',' || line[j] == '}') {
-                    if (!isValue || !curIndex.size() || !curValue.size()) {
+                    if (curIndex.size() == 0 && curValue.size() == 0) {
+                        continue;
+                    }
+                    if ((!isValue || !curIndex.size() || !curValue.size())) {
                         error = "语义规则输入有误";
                         return;
                     }
@@ -130,10 +133,6 @@ Grammer::Grammer(string input) {
             isStartToken = false;
         }
         // 映射语义规则
-        if (action.empty()) {
-            error = "语义规则输入有误";
-            return;
-        }
         actions[key].push_back(action);
         action.clear();
     }

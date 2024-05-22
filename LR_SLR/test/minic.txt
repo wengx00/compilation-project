@@ -40,11 +40,11 @@ compound-stmt -> lb_bracket local-definitions statement-list rb_bracket
 { 0: 0, 1: 1 }
 local-definitions -> local-definitions variable-definition
 {}
-local-definitions -> empty
+local-definitions -> EPSILON
 { 0: 0, 1: 1 }
 statement-list -> statement-list statement
 {}
-statement-list -> empty
+statement-list -> EPSILON
 { 0: -1 }
 statement -> expression-stmt
 { 0: -1 }
@@ -123,7 +123,7 @@ call -> IDENTIFIER lbracket arguments rbracket
 { 0: -1 }
 arguments -> argument-list
 {}
-arguments -> empty
+arguments -> EPSILON
 { 0: 0, 2: 1 }
 argument-list -> argument-list comma expression
 { 0: -1 }
