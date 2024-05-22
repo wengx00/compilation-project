@@ -28,7 +28,7 @@ parameters -> parameter-list
 { 0: -1 }
 parameters -> void
 { 0: 0, 2: 1 }
-parameter-list -> parameter-list coma parameter
+parameter-list -> parameter-list comma parameter
 { 0: -1 }
 parameter-list -> parameter
 { 0: 0, 1: 1 }
@@ -70,7 +70,7 @@ return-stmt -> return semi
 { 1: 0 }
 return-stmt -> return expression semi
 { 0: 0, 1: -1, 2: 1 }
-expression-> variable assign expression
+expression -> variable assign expression
 { 0: -1 }
 expression -> simple-expression
 { 0: 0 }
@@ -98,18 +98,18 @@ additive-expression -> additive-expression addop term
 { 0: -1 }
 additive-expression -> term
 { 0: -1 }
-addop -> +
+addop -> plus
 { 0: -1 }
-addop -> -
+addop -> minus
 term -> term mulop factor
 { 0: -1 }
 term -> factor
 { 0: -1 }
-mulop -> *
+mulop -> time
 { 0: -1 }
-mulop -> /
+mulop -> divide
 { 0: -1 }
-mulop -> %
+mulop -> mod
 { 1: -1 }
 factor -> lbracket expression rbracket
 { 0: -1 }

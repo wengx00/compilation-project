@@ -225,6 +225,7 @@ void MainWindow::on_toParseGrammer_clicked() {
         renderDfaTable();
         renderSlrTable();
     }
+    ui->resultTab->setCurrentIndex(0);
 }
 
 void MainWindow::on_chooseFile_clicked() {
@@ -290,6 +291,7 @@ void MainWindow::on_toParseStatement_clicked() {
         item->setText(0, QString::fromStdString(result.error));
         QMessageBox::warning(this, "提示", "语法树解析失败");
     }
+    ui->resultTab->setCurrentIndex(1);
 }
 
 

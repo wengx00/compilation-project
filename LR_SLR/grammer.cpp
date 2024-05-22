@@ -327,6 +327,9 @@ void Grammer::initRelation() {
         // 遍历DFA节点上的每一个项目
         for (int it = 0; it < dfa[cur].size(); ++it) {
             Item& item = dfa[cur][it]; // 取出当前项
+            if (formula[item.key][item.rawsIndex][item.rawIndex] == "comma") {
+                cout << "comma\n";
+            }
             if (item.type == ItemType::BACKWARD) {
                 // 规约项
                 set<string> followOfItem = getFollow(item.key);
@@ -408,7 +411,7 @@ void Grammer::initIsSLR() {
 int Grammer::findState(vector<Item>& current) {
     for (int i = 0; i < dfa.size(); ++i) {
         auto& state = dfa[i];
-        // if (current.size() != state.size()) continue;
+        // if (current.size() < state.size()) continue;
         bool exist = true;
         // 拿个map存state加快查询速度
         unordered_map<string, int> stateMap;
@@ -495,7 +498,7 @@ ParsedResult Grammer::parse(string input) {
             continue;
         }
         if (c == '\n') {
-            if (label.size()) {
+            if (label.size() && label != "COMMENT" && label != "comment") {
                 lex.push({ label, value });
             }
             label.clear();
@@ -514,7 +517,7 @@ ParsedResult Grammer::parse(string input) {
             value += c;
         }
     }
-    if (label.size() && !isLabel) {
+    if (label.size() && !isLabel && label != "COMMENT" && label != "comment") {
         lex.push({ label, value });
     }
     ParsedResult result;
@@ -559,25 +562,31 @@ ParsedResult Grammer::parse(string input) {
             ss << "在状态" << state << "通过" << token << "规约到状态" << target;
             Item& item = dfa[state][target];
             vector<string>& raws = formula[item.key][item.rawsIndex];
+            vector<string> rawsCopy;
+            for (auto& el : raws) {
+                if (el != EPSILON) {
+                    rawsCopy.push_back(el);
+                }
+            }
             // 生成语法树节点
             map<int, int> action = actions[item.key][item.rawsIndex];
             result.routes.push_back(ss.str());
             TreeNode* current = new TreeNode;
             current->label = item.key;
-            int offset = workspace.size() - raws.size();
+            int offset = workspace.size() - rawsCopy.size();
             if (offset < 0) {
-                result.error = "语法树解析错误";
+                result.error = "语法树解析错误，缺少节点";
                 return result;
             }
-            for (int i = 0; i < raws.size(); i++) {
-                int index = raws.size() - 1 - i;
+            for (int i = 0; i < rawsCopy.size(); i++) {
+                int index = rawsCopy.size() - 1 - i;
                 if (!action.count(index) || action[index] < -1) {
                     continue;
                 }
                 if (action[index] == -1) {
                     // 作为树根
                     if (workspace[index + offset]->children.size() > 0 && current->children.size() > 0) {
-                        result.error = "语法树解析错误";
+                        result.error = "语法树解析错误，根节点冲突";
                         return result;
                     }
                     if (workspace[index + offset]->children.size() == 0) {
@@ -631,7 +640,7 @@ ParsedResult Grammer::parse(string input) {
         break;
     }
     if (workspace.size() != 1) {
-        error = "语法树解析错误";
+        error = "语法树解析错误，规约树不唯一";
         return result;
     }
     result.root = workspace[0];
