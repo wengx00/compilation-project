@@ -1,14 +1,21 @@
 /*
- * @Author: wengx00 wengx86@163.com
+ * @Author: 20212131001 翁行
  * @Date: 2023-12-16 20:16:38
+ * @LastEditTime: 2024-05-23 13:46:48
+ * @FilePath: /LR_SLR/grammer.h
+ * @Description: 文法解析、DFA生成、语法树生成 ALL in one
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ *
+ * 版本历史详见.cpp文件
  */
 #include <vector>
 #include <set>
 #include <map>
 #include <string>
 
+ // 空符号
 #define EPSILON "EPSILON"
+// 结束符
 #define END_FLAG "$"
 
 enum ItemType {

@@ -1,7 +1,20 @@
 /*
- * @Author: wengx00 wengx86@163.com
+ * @Author: 20212131001 翁行
  * @Date: 2023-12-16 22:04:11
+ * @LastEditTime: 2024-05-23 13:49:50
+ * @FilePath: /LR_SLR/grammer.cpp
+ * @Description: 文法解析、DFA生成、语法树生成 ALL in one
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ *
+ * 版本历史
+ * 2024/5/23 feat: 语法树自动展开和TAB切换
+ * 2024/5/22 fix: 语义规则解析问题修复
+ * 2024/5/21 feat：显示语法树
+ * 2024/5/21 feat: 语法树生成
+ * 2024/5/20 feat: 新增 BNF 文法语义函数输入和解析支持
+ * 2024/5/19 fix: SLR 分析 Bugfixes
+ * 2024/5/19 feat: 适配项目1：XLEX 解析结果（parse 解析输入变为项目1解析后的LEX文件）
+ * 2024/5/18 feat: 复用上学期编译原理实验 LR_SLR 源代码
  */
 #include "grammer.h"
 #include <iostream>
@@ -10,6 +23,7 @@
 
 using namespace std;
 
+// 根据字符串输入构造文法、DFA、SLR表
 Grammer::Grammer(string input) {
     vector<string> lines;
     int from = 0, i = 0;
@@ -161,9 +175,9 @@ Grammer::Grammer(string input) {
     // 构建DFA
     initRelation();
     // 判断是否SLR
-    initIsSLR();
+    // initIsSLR();
 }
-
+// 获取First集合
 set<string> Grammer::getFirst(string key) {
     if (!notEnd.count(key)) {
         // 是终结节点
@@ -174,9 +188,9 @@ set<string> Grammer::getFirst(string key) {
     // 非终结节点，返回其First集
     return first[key];
 }
-
+// 获取Follow集合
 set<string> Grammer::getFollow(string key) { return follow[key]; }
-
+// 生成First集合
 void Grammer::initFirst() {
     bool shouldUpdate = true;
     while (shouldUpdate) {
@@ -213,7 +227,7 @@ void Grammer::initFirst() {
         }
     }
 }
-
+// 生成Follow集合
 void Grammer::initFollow() {
     bool shouldUpdate = true;
     // start的Follow为END_FLAG
@@ -280,7 +294,7 @@ void Grammer::initFollow() {
         }
     }
 }
-
+// 扩展DFA节点
 void Grammer::extend(vector<Item>& nodes) {
     for (int i = 0; i < nodes.size(); ++i) {
         Item& node = nodes[i];
@@ -308,11 +322,11 @@ void Grammer::extend(vector<Item>& nodes) {
         }
     }
 }
-
+// 扩展DFA节点
 void Grammer::extend(int state) {
     extend(dfa[state]);
 }
-
+// 生成DFA
 void Grammer::initRelation() {
     // 初始节点 => start指示的推导式的第一条的第一个符号
     vector<Item> beginState;
@@ -379,7 +393,7 @@ void Grammer::initRelation() {
         }
     }
 }
-
+// 判断是否SLR
 void Grammer::initIsSLR() {
     // DFA图构建完成后 -> 判断移进规约是否冲突
     if (isSLR) {
@@ -407,7 +421,7 @@ void Grammer::initIsSLR() {
         }
     }
 }
-
+// 获取当前节点是否在当前DFA结点列表中
 int Grammer::findState(vector<Item>& current) {
     for (int i = 0; i < dfa.size(); ++i) {
         auto& state = dfa[i];
@@ -429,18 +443,23 @@ int Grammer::findState(vector<Item>& current) {
     return -1;
 }
 
+// 是否SLR
 bool Grammer::slr() { return isSLR; }
+// 是否有语法错误
 bool Grammer::bad() { return !error.empty(); }
+// 获取不是SLR的原因
 string Grammer::getReason() { return reason; }
+// 获取语法错误原因
 string Grammer::getError() { return error; }
-
+// 获取非终结symbols集合
 set<string> Grammer::getNotEnd() { return notEnd; }
+// 获取终结symbols集合
 set<string> Grammer::getEnd() { return endSet; }
-
+// 获取文法起始symbols
 string Grammer::getStart() {
     return start;
 }
-
+// 获取拓广文法
 string Grammer::getExtraGrammer() {
     stringstream ss;
     map<string, bool> visited;
@@ -466,9 +485,9 @@ string Grammer::getExtraGrammer() {
     }
     return ss.str();
 }
-
+// 获取生成的DFA
 vector<vector<Item>> Grammer::getDfa() { return dfa; }
-
+// 获取解析后的文法
 map<string, vector<vector<string>>> Grammer::getFormula() {
     return formula;
 }
@@ -488,7 +507,7 @@ int Grammer::backward(int state, string key) {
     }
     return -1;
 }
-
+// 根据lex输入和已生成的SLR来解析生成语法树
 ParsedResult Grammer::parse(string input) {
     // input 是lex文件 LABEL : VALUE
     queue<pair<string, string>> lex;

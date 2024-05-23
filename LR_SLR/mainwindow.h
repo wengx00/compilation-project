@@ -1,7 +1,12 @@
 /*
- * @Author: wengx00 wengx86@163.com
- * @Date: 2023-12-16 21:46:02
+ * @Author: 20212131001 翁行
+ * @Date: 2024-05-23 13:19:39
+ * @LastEditTime: 2024-05-23 13:48:41
+ * @FilePath: /LR_SLR/mainwindow.h
+ * @Description: QT主窗口头文件
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ *
+ * 版本历史详见.cpp文件
  */
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H

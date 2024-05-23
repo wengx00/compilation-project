@@ -62,6 +62,7 @@
         "typeinfo": "cpp",
         "unordered_map": "cpp",
         "variant": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "qmessagebox": "cpp"
     }
 }

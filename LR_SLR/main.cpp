@@ -1,6 +1,9 @@
 /*
- * @Author: wengx00 wengx86@163.com
+ * @Author: 20212131001 翁行
  * @Date: 2023-12-16 13:50:54
+ * @LastEditTime: 2024-05-23 13:35:51
+ * @FilePath: /LR_SLR/main.cpp
+ * @Description: 入口函数
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
  */
 #include "mainwindow.h"

@@ -1,7 +1,19 @@
 /*
- * @Author: wengx00 wengx86@163.com
- * @Date: 2023-12-17 00:49:57
+ * @Author: 20212131001 翁行
+ * @Date: 2024-05-23 13:19:28
+ * @LastEditTime: 2024-05-23 13:48:18
+ * @FilePath: /LR_SLR/mainwindow.cpp
+ * @Description: QT主窗口
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
+ *
+ * 版本历史
+ * 2024/5/23 feat: 导入LEX文件
+ * 2024/5/23 feat: 语法树自动展开和TAB切换
+ * 2024/5/21 feat：显示语法树
+ * 2024/5/21 feat: 语法树生成
+ * 2024/5/20 fix: 优化布局
+ * 2024/5/19 feat: 适配项目1：XLEX 解析结果（parse 解析输入变为项目1解析后的LEX文件）
+ * 2024/5/18 feat: 复用上学期编译原理实验 LR_SLR 源代码
  */
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -165,12 +177,14 @@ void MainWindow::renderSlrTable() {
         int column = 1;
         for (auto& token : notEndSet) {
             if (token == startToken) continue;
+            // 移进目标
             int target = grammer.forward(state, token);
             if (target > -1) {
                 QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 end->setText("s" + QString::number(target));
                 table->setItem(state, column, end);
             }
+            // 规约目标
             else if ((target = grammer.backward(state, token)) > -1) {
                 QTableWidgetItem* end = new QTableWidgetItem(); // 状态编号
                 Item& node = dfa[state][target];
@@ -301,7 +315,7 @@ void MainWindow::on_toParseStatement_clicked() {
 }
 
 
-// 遍历树
+// 遍历树生成QTreeWidgetItem节点
 void MainWindow::traverseTree(TreeNode* tree, QTreeWidgetItem* p) {
     if (tree == NULL) return;
     QTreeWidgetItem* item;
