@@ -1,6 +1,9 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-31 23:00:20
+ * @LastEditTime: 2024-05-23 23:04:27
+ * @FilePath: /XLEX/include/mdfa.hpp
+ * @Description: DFA最小化
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
 
@@ -19,6 +22,7 @@
 #include <stack>
 #include <sstream>
 
+ // MDFA节点
 struct MDfaNode {
     int state;
     bool isEnd;
@@ -45,6 +49,7 @@ struct MDfaNode {
     }
 };
 
+// MDFA All in one
 class MDfa {
 
 private:
@@ -52,7 +57,7 @@ private:
     vector<MDfaNode*> nodes;
 
     void minimize() { // 最小化
-        set<char> symbols = dfa.getNfa().getSymbols();
+        set<char> symbols = dfa.getNfa().getSymbols(); // 转移符号
         set<DfaNode*> left, right; // 两个拆分
         vector<set<DfaNode*>> completed; // 已完成拆分
         vector<set<DfaNode*>> prepared; // 待拆分
@@ -165,6 +170,7 @@ private:
         }
     }
 
+    // 以symbol步进的结果集合
     set<int> forward(set<DfaNode*> source, char symbol) {
         set<int> result;
         for (DfaNode* node : source) {
@@ -179,11 +185,13 @@ public:
         minimize();
     };
 
+    // 获取MDFA节点列表
     vector<MDfaNode*> getNodes() {
         return nodes;
     }
 
-    string lex() { // 生成C++分析程序
+    // Legacy：生成C++分析程序。该项目已改用其他方法
+    string lex() {
         stringstream ss;
         ss << "#include <iostream>" << '\n';
         ss << "#include <string>" << '\n';

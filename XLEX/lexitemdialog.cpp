@@ -1,8 +1,12 @@
 /*
  * @Author: 翁行
  * @Date: 2024-05-07 13:14:38
+ * @LastEditTime: 2024-05-23 23:03:46
+ * @FilePath: /XLEX/lexitemdialog.cpp
+ * @Description: 生成NFA、DFA、MDFA表的UI
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
+
 #include "lexitemdialog.h"
 #include "codepreviewer.h"
 #include "./ui_lexitemdialog.h"
@@ -26,6 +30,7 @@ LexItemDialog::~LexItemDialog() {
     if (mdfa) delete mdfa;
 }
 
+// 读取YAML输入->YAML解析->NFA->DFA->MDFA
 void LexItemDialog::init(YAML::Node& doc) {
     // 所有保留字
     for (auto it = doc["RESERVED"].begin(); it != doc["RESERVED"].end(); ++it) {
@@ -110,6 +115,7 @@ void LexItemDialog::init(YAML::Node& doc) {
     this->op = op;
 }
 
+// 渲染NFA表
 void LexItemDialog::generateNfaTable() {
     NfaGraph nfaGraph = nfa->getGraph();
 
@@ -119,6 +125,7 @@ void LexItemDialog::generateNfaTable() {
     std::vector<int> visited(nfaGraph.end->state + 1);
     std::queue<NfaNode*> queue;
 
+    // BFS生成一张二维表
     queue.push(nfaGraph.start);
     while (queue.size()) {
         NfaNode* cur = queue.front();
@@ -170,6 +177,7 @@ void LexItemDialog::generateNfaTable() {
     }
 }
 
+// 生成DFA表
 void LexItemDialog::generateDfaTable() {
     std::vector<DfaNode*> nodes = dfa->getNodes();
     std::set<char> symbols = nfa->getSymbols();
@@ -187,6 +195,7 @@ void LexItemDialog::generateDfaTable() {
 
     for (int i = 0; i < nodes.size(); ++i) {
         DfaNode* cur = nodes[i];
+        // 状态编号
         dfaTable->setItem(i, 0, new QTableWidgetItem(QString::number(i)));
         int col = 1;
         for (char symbol : symbols) {
@@ -198,6 +207,7 @@ void LexItemDialog::generateDfaTable() {
     }
 }
 
+// 生成最小化DFA表
 void LexItemDialog::generateMDfaTable() {
     std::set<char> symbols = nfa->getSymbols();
     std::vector<MDfaNode*> nodes = mdfa->getNodes();
@@ -216,6 +226,7 @@ void LexItemDialog::generateMDfaTable() {
 
     for (int i = 0; i < nodes.size(); ++i) {
         MDfaNode* cur = nodes[i];
+        // 状态编号
         mdfaTable->setItem(i, 0, new QTableWidgetItem(QString::number(i)));
         int col = 1;
         for (char symbol : symbols) {
@@ -227,6 +238,7 @@ void LexItemDialog::generateMDfaTable() {
     }
 }
 
+// 代码生成
 QString LexItemDialog::codeGenerate() {
     std::vector<MDfaNode*> nodes = mdfa->getNodes();
     QString code;
@@ -287,9 +299,9 @@ QString LexItemDialog::codeGenerate() {
         "\tstring label;\n"
         "\tif (reserved.count(token)) label = reserved[token];\n"
         "\telse if (op.count(token)) label = op[token];\n"
-        "\telse if (isNumber(token)) label = \"Number\";\n"
-        "\telse if (isComment(token)) label = \"Comment\";\n"
-        "\telse label = \"Identifier\";\n"
+        "\telse if (isNumber(token)) label = \"NUMBER\";\n"
+        "\telse if (isComment(token)) label = \"COMMENT\";\n"
+        "\telse label = \"IDENTIFIER\";\n"
         "\tcout << label << \" : \" << token << '\\n';\n"
         "\tos << label << \" : \" << token << '\\n';\n"
         "}\n";
@@ -424,6 +436,7 @@ QString LexItemDialog::codeGenerate() {
     return code;
 }
 
+// 触发生成代码
 void LexItemDialog::on_codeGenerate_clicked() {
     QString code = codeGenerate();
     CodePreviewer* codePreviewer = new CodePreviewer(code, this);

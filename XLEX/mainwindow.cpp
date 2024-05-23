@@ -1,6 +1,9 @@
 /*
  * @Author: 翁行
  * @Date: 2024-05-07 13:07:19
+ * @LastEditTime: 2024-05-23 23:04:57
+ * @FilePath: /XLEX/mainwindow.cpp
+ * @Description: 主窗口
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
 #include "mainwindow.h"
@@ -26,6 +29,7 @@ void MainWindow::init() {
 
 }
 
+// 导入文件
 void MainWindow::on_importFileAction_clicked() {
     // 获取文件名
     QString fileName{ QFileDialog::getOpenFileName(
@@ -50,8 +54,8 @@ void MainWindow::on_importFileAction_clicked() {
 
 /**
  * YAML 文件的定义如下：
- * 需要包含 identifier、number、reserved、letter、digit、comment、op
- * reserved、op 块需要为 key-value 对
+ * 需要包含大写的 identifier、number、reserved、letter、digit、comment、op
+ * reserved、op 块需要为 key-value 对，其中 reserved 是 key-array 对，op 是 key-string 对
  * letter、digit 为 string 数组
  * 其他块都为 string 的 value
 */

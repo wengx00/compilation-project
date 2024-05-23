@@ -1,6 +1,9 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-30 23:37:41
+ * @LastEditTime: 2024-05-23 22:33:33
+ * @FilePath: /XLEX/include/globals.h
+ * @Description: 宏定义和工具函数
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
 
@@ -23,7 +26,10 @@
 #define LBRACKET '('
 // 右括号
 #define RBRACKET ')'
-// TODO: . + * ? | 字符转译
+// 左中括号
+#define LMBRACKET '['
+// 右中括号
+#define RMBRACKET ']'
 // 任意字符
 #define ANY '~'
 

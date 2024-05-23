@@ -1,9 +1,11 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-31 16:20:40
+ * @LastEditTime: 2024-05-23 22:55:18
+ * @FilePath: /XLEX/include/dfa.hpp
+ * @Description: NFA图转DFA图
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
-
 #ifndef _DFA_HPP
 #define _DFA_HPP
 
@@ -20,6 +22,7 @@
 
 using namespace std;
 
+// DFA节点
 struct DfaNode {
     int state;
     bool isEnd = false;
@@ -48,10 +51,11 @@ struct DfaNode {
     }
 };
 
+// DFA All in one
 class Dfa {
-
 private:
-    void generate() { // 生成DFA图
+    // 生成DFA图
+    void generate() {
         NfaGraph nfaGraph = nfa.getGraph();
         set<char> symbols = nfa.getSymbols();
         DfaNode* start = new DfaNode();
@@ -85,7 +89,8 @@ private:
         }
     }
 
-    set<NfaNode*> forward(NfaNode* source, char symbol) { // 以symbol步进
+    // 以symbol步进
+    set<NfaNode*> forward(NfaNode* source, char symbol) {
         set<NfaNode*> result;
         for (NfaNode* next : source->transfers[symbol]) {
             result.insert(next);
@@ -96,7 +101,8 @@ private:
         return result;
     }
 
-    set<NfaNode*> epsilonClosure(NfaNode* source) { // NFA节点的EPSILON闭包
+    // NFA节点的EPSILON闭包
+    set<NfaNode*> epsilonClosure(NfaNode* source) {
         set<NfaNode*> closure;
         stack<NfaNode*> prepared; // DFS栈
         map<int, int> visited;
@@ -119,9 +125,11 @@ public:
     Dfa(Nfa& nfa) : nfa(nfa) {
         generate();
     }
+    // 获取原始NFA
     Nfa getNfa() {
         return nfa;
     }
+    // 获取DFA节点列表
     vector<DfaNode*> getNodes() {
         return nodes;
     }

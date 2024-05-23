@@ -1,9 +1,11 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-31 15:06:30
+ * @LastEditTime: 2024-05-23 22:58:56
+ * @FilePath: /XLEX/include/nfa.hpp
+ * @Description: 输入解析和NFA图生成
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
-
 #ifndef _NFA_HPP
 #define _NFA_HPP
 
@@ -18,9 +20,11 @@
 
 using namespace std;
 
+// NFA节点
 struct NfaNode {
     int state = 0;
     bool isEnd = false;
+    // 转移
     map<char, vector<NfaNode*>> transfers;
 
     NfaNode() : state(0) {}
@@ -28,6 +32,7 @@ struct NfaNode {
     NfaNode(const NfaNode& node) : state(node.state), isEnd(node.isEnd), transfers(node.transfers) {}
 };
 
+// Nfa子图
 struct NfaGraph {
     NfaNode* start;
     NfaNode* end;
@@ -57,15 +62,18 @@ struct NfaGraph {
     }
 };
 
+// NFA All in one
 class Nfa {
 private:
-    NfaGraph fromSymbol(char symbol) { // 根据Symbol生成Nfa子图
+    // 根据Symbol生成Nfa子图
+    NfaGraph fromSymbol(char symbol) {
         NfaGraph graph(new NfaNode, new NfaNode(1));
         graph.end->isEnd = true;
         graph.start->transfers[symbol].push_back(graph.end);
         return graph;
     }
-    NfaGraph setConcat(NfaGraph& t1, NfaGraph& t2) { // 连接Nfa子图
+    // 连接Nfa子图
+    NfaGraph setConcat(NfaGraph& t1, NfaGraph& t2) {
         NfaGraph graph;
         graph.start = t1.start;
         graph.end = t2.end;
@@ -76,7 +84,8 @@ private:
         t1.end->transfers[EPSILON].push_back(t2.start);
         return graph;
     }
-    NfaGraph setUnion(NfaGraph& t1, NfaGraph& t2) { // Nfa子图 或运算
+    // Nfa子图 或运算
+    NfaGraph setUnion(NfaGraph& t1, NfaGraph& t2) {
         NfaGraph graph(new NfaNode, new NfaNode);
         graph.end->isEnd = true;
         // 更新子图t1、t2的结点编号
@@ -93,7 +102,8 @@ private:
         t2.end->transfers[EPSILON].push_back(graph.end);
         return graph;
     }
-    NfaGraph setClosure(NfaGraph& target) { // Nfa子图闭包
+    // Nfa子图闭包
+    NfaGraph setClosure(NfaGraph& target) {
         NfaGraph graph(new NfaNode, new NfaNode);
         graph.end->isEnd = true;
         // 更新子图target的结点编号
@@ -133,6 +143,7 @@ private:
         return graph;
     }
 
+    // 根据操作符生成Nfa子图
     void setAction(char op, stack<NfaGraph>& subgraphs) {
         NfaGraph result;
         if (op == CLOSURE || op == CLOSURE_PLUS || op == CLOSURE_STAR) {
@@ -170,6 +181,7 @@ private:
         string prepared = ""; // 预处理后的输入字符串
         stack<char> ops; // 符号栈
         stack<NfaGraph> subgraphs; // 子图栈
+        bool inBracket = false; // 在中括号中
         for (int i = 0; i < input.size(); ++i) { // 预处理输入字符串（加入CONCAT字符）
             char id = input[i];
             if (id == '\\' && !translate) {
@@ -178,23 +190,37 @@ private:
                 continue;
             }
             if (_skip(id)) continue; // 跳过无意义字符
-            prepared.push_back(id);
+            // 中括号处理
+            if (id == LMBRACKET && !translate) {
+                inBracket = true;
+                prepared.push_back(LBRACKET);
+            }
+            else if (id == RMBRACKET && !translate) {
+                inBracket = false;
+                prepared.push_back(RBRACKET);
+            }
+            else {
+                prepared.push_back(id);
+            }
             if (!(i + 1 >= input.size() ||
                 ((
                     input[i] == UNION ||
                     input[i] == CONCAT ||
-                    input[i] == LBRACKET
+                    input[i] == LBRACKET ||
+                    input[i] == LMBRACKET
                     ) &&
                     !translate
                     ) ||
                 input[i + 1] == RBRACKET ||
+                input[i + 1] == RMBRACKET ||
                 input[i + 1] == UNION ||
                 input[i + 1] == CLOSURE ||
                 input[i + 1] == CLOSURE_PLUS ||
                 input[i + 1] == CLOSURE_STAR
-                )) prepared.push_back(CONCAT); // 这些情况用手动加入联结符号
+                )) prepared.push_back(inBracket ? UNION : CONCAT); // 不是这些情况就手动加入联结符号
             translate = false;
         }
+        cout << "Prepared RegExp: " << prepared << '\n';
         translate = false;
         for (int i = 0; i < prepared.size(); ++i) {
             char id = prepared[i]; // 当前Identifier
@@ -247,9 +273,11 @@ public:
         generate(input);
     }
 
+    // 获取转移字符集
     set<char> getSymbols() {
         return symbols;
     }
+    // 获取NFA图
     NfaGraph getGraph() {
         return graph;
     }

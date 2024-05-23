@@ -1,6 +1,9 @@
 /*
  * @Author: 翁行
  * @Date: 2024-05-09 23:13:07
+ * @LastEditTime: 2024-05-23 22:59:17
+ * @FilePath: /XLEX/codepreviewer.cpp
+ * @Description: 生成的代码预览窗口
  * Copyright 2024 (c) 翁行, All Rights Reserved.
  */
 #include "codepreviewer.h"
@@ -20,6 +23,7 @@ CodePreviewer::~CodePreviewer() {
     delete ui;
 }
 
+// 保存生成的代码
 void CodePreviewer::on_saveCode_clicked() {
     QString filename = QFileDialog::getSaveFileName(this, "保存文件", ".", "C++源文件(*.cpp)");
     QFile file{ filename };
