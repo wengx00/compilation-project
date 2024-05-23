@@ -309,6 +309,7 @@ void MainWindow::traverseTree(TreeNode* tree, QTreeWidgetItem* p) {
     }
     item->setText(0, text);
     item->setForeground(0, Qt::black);
+    item->setExpanded(true);
     for (TreeNode* child : tree->children) {
         traverseTree(child, item);
     }

@@ -473,6 +473,7 @@ map<string, vector<vector<string>>> Grammer::getFormula() {
     return formula;
 }
 
+// 拿到移进目标
 int Grammer::forward(int state, string key) {
     if (forwards[state].count(key)) {
         return forwards[state][key];
@@ -480,6 +481,7 @@ int Grammer::forward(int state, string key) {
     return -1;
 }
 
+// 拿到规约目标
 int Grammer::backward(int state, string key) {
     if (backwards[state].count(key)) {
         return backwards[state][key];
