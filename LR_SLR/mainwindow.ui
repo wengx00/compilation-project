@@ -70,6 +70,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="importLex">
+           <property name="text">
+            <string>导入</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="toParseStatement">
            <property name="text">
             <string>分析</string>

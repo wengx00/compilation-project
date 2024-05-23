@@ -19,6 +19,7 @@ MainWindow::~MainWindow() {
     if (currentGrammer) delete currentGrammer;
 }
 
+// 渲染基本信息（语法错误、first和follow集合、文法预览）
 void MainWindow::renderBasicInfo() {
     if (!currentGrammer) {
         QMessageBox::information(this, "提示", "请先点击解析文法");
@@ -55,6 +56,7 @@ void MainWindow::renderBasicInfo() {
     ui->extraGrammer->setPlainText(extraGrammer);
 }
 
+// 渲染DFA表
 void MainWindow::renderDfaTable() {
     if (!currentGrammer) {
         QMessageBox::information(this, "提示", "请先点击解析文法");
@@ -129,7 +131,7 @@ void MainWindow::renderDfaTable() {
 
 }
 
-
+// 渲染SLR表
 void MainWindow::renderSlrTable() {
     Grammer& grammer = *currentGrammer;
     std::set<std::string> endSet = grammer.getEnd();
@@ -216,6 +218,7 @@ void MainWindow::renderSlrTable() {
     }
 }
 
+// 解析文法
 void MainWindow::on_toParseGrammer_clicked() {
     std::string grammerStr = ui->grammer->toPlainText().toStdString();
     Grammer* grammer = new Grammer(grammerStr);
@@ -228,6 +231,7 @@ void MainWindow::on_toParseGrammer_clicked() {
     ui->resultTab->setCurrentIndex(0);
 }
 
+// 导入文法文件
 void MainWindow::on_chooseFile_clicked() {
     // 获取文件名
     QString fileName{ QFileDialog::getOpenFileName(
@@ -250,6 +254,7 @@ void MainWindow::on_chooseFile_clicked() {
         QMessageBox::information(this, "提示", "读取失败");
 }
 
+// 保存文法文件
 void MainWindow::on_saveFile_clicked() {
     QString tempPath = QDir::homePath();
     QString savePath = QFileDialog::getSaveFileName(this, tr("SaveSourceCode"), tempPath, "TEXT(*.txt)");
@@ -268,6 +273,7 @@ void MainWindow::on_saveFile_clicked() {
     QMessageBox::information(this, "提示", "文件保存成功");
 }
 
+// 解析LEX
 void MainWindow::on_toParseStatement_clicked() {
     QString statement = ui->statement->toPlainText();
     if (statement.isEmpty()) {
@@ -313,5 +319,29 @@ void MainWindow::traverseTree(TreeNode* tree, QTreeWidgetItem* p) {
     for (TreeNode* child : tree->children) {
         traverseTree(child, item);
     }
+}
+
+
+// 导入LEX文件
+void MainWindow::on_importLex_clicked() {
+    // 获取文件名
+    QString fileName{ QFileDialog::getOpenFileName(
+        this, "打开源文件", ".", "文本文件(*.lex, *.txt, *)") };
+    // 构造文件对象
+    QFile file{ fileName };
+
+    if (fileName.isEmpty())
+        return;
+
+    // 读取全部内容
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        ui->statement->setText(file.readAll());
+        QMessageBox::information(this, "提示", "读取成功");
+        file.close();
+    }
+
+    // 文件打开失败
+    else
+        QMessageBox::information(this, "提示", "读取失败");
 }
 

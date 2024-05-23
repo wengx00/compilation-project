@@ -30,6 +30,8 @@ private slots:
 
     void on_toParseStatement_clicked();
 
+    void on_importLex_clicked();
+
 private:
     Ui::MainWindow* ui;
     void renderBasicInfo();
