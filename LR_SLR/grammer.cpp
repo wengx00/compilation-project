@@ -1,7 +1,7 @@
 /*
  * @Author: 20212131001 翁行
  * @Date: 2023-12-16 22:04:11
- * @LastEditTime: 2024-05-23 13:49:50
+ * @LastEditTime: 2024-05-25 00:21:21
  * @FilePath: /LR_SLR/grammer.cpp
  * @Description: 文法解析、DFA生成、语法树生成 ALL in one
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
@@ -611,11 +611,6 @@ ParsedResult Grammer::parse(string input) {
                         return result;
                     }
                     if (workspace[index + offset]->children.size() == 0) {
-                        for (auto child : current->children) {
-                            if (child) {
-                                child->parent = workspace[index + offset];
-                            }
-                        }
                         workspace[index + offset]->children = current->children;
                     }
                     current = workspace[index + offset];
@@ -627,7 +622,6 @@ ParsedResult Grammer::parse(string input) {
                     current->children.resize(action[index] + 1);
                 }
                 current->children[action[index]] = child;
-                child->parent = current;
             }
             // 出栈
             workspace.erase(workspace.begin() + offset, workspace.end());

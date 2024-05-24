@@ -1,7 +1,7 @@
 /*
  * @Author: 20212131001 翁行
  * @Date: 2023-12-16 20:16:38
- * @LastEditTime: 2024-05-23 13:46:48
+ * @LastEditTime: 2024-05-25 00:21:04
  * @FilePath: /LR_SLR/grammer.h
  * @Description: 文法解析、DFA生成、语法树生成 ALL in one
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
@@ -47,8 +47,6 @@ class TreeNode {
 public:
     // 孩子节点
     std::vector<TreeNode*> children;
-    // 父节点
-    TreeNode* parent;
     // Label
     std::string label;
     // Value
