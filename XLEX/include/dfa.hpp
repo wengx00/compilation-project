@@ -1,7 +1,7 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-31 16:20:40
- * @LastEditTime: 2024-05-23 22:55:18
+ * @LastEditTime: 2024-05-31 00:46:22
  * @FilePath: /XLEX/include/dfa.hpp
  * @Description: NFA图转DFA图
  * Copyright 2024 (c) 翁行, All Rights Reserved.
@@ -32,6 +32,7 @@ struct DfaNode {
     DfaNode(int state) : state(state) {}
     DfaNode(const DfaNode& node) : state(node.state), transfers(node.transfers), nfaNodes(node.nfaNodes) {}
 
+    // 绑定NFA集合到DFA节点中
     void bindNfaNodes(set<NfaNode*> nodes) {
         nfaNodes = nodes;
         for (NfaNode* node : nodes) {

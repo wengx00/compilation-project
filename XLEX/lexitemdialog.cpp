@@ -1,7 +1,7 @@
 /*
  * @Author: 翁行
  * @Date: 2024-05-07 13:14:38
- * @LastEditTime: 2024-05-23 23:03:46
+ * @LastEditTime: 2024-05-28 01:58:40
  * @FilePath: /XLEX/lexitemdialog.cpp
  * @Description: 生成NFA、DFA、MDFA表的UI
  * Copyright 2024 (c) 翁行, All Rights Reserved.

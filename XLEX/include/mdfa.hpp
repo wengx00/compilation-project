@@ -1,7 +1,7 @@
 /*
  * @Author: 翁行
  * @Date: 2023-12-31 23:00:20
- * @LastEditTime: 2024-05-23 23:04:27
+ * @LastEditTime: 2024-05-31 00:45:54
  * @FilePath: /XLEX/include/mdfa.hpp
  * @Description: DFA最小化
  * Copyright 2024 (c) 翁行, All Rights Reserved.
@@ -29,6 +29,7 @@ struct MDfaNode {
     set<DfaNode*> dfaNodes; // 持有的DFA结点
     map<char, int> transfer;
 
+    // 绑定DFA节点到MDFA中
     void bindDfaNodes(set<DfaNode*> dfaNodes) {
         this->dfaNodes = dfaNodes;
         for (DfaNode* node : dfaNodes) {
