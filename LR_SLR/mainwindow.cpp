@@ -1,7 +1,7 @@
 /*
  * @Author: 20212131001 翁行
  * @Date: 2024-05-23 13:19:28
- * @LastEditTime: 2024-05-23 13:48:18
+ * @LastEditTime: 2024-05-29 13:01:29
  * @FilePath: /LR_SLR/mainwindow.cpp
  * @Description: QT主窗口
  * Copyright (c) 2024 by wengx00, All Rights Reserved.
